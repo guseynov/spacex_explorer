@@ -12,7 +12,7 @@ export function SectionHeading({
   action?: React.ReactNode;
 }) {
   const eyebrowContent = eyebrow ? (
-    <p className="text-[0.92rem] font-medium text-[var(--info)]">
+    <p className="type-mono text-[0.92rem] font-medium text-[var(--info)]">
       {eyebrow}
     </p>
   ) : null;

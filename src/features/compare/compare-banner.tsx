@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Route } from "next";
 import { useCompare } from "./compare-context";
 
 export function CompareBanner() {
+  const router = useRouter();
   const { items, hasHydrated, clearCompare } = useCompare();
 
   if (!hasHydrated || items.length === 0) {
@@ -13,14 +14,14 @@ export function CompareBanner() {
 
   const compareHref =
     items.length === 2
-      ? (`/compare?left=${items[0].id}&right=${items[1].id}` as unknown as Route)
+      ? (`/compare?left=${items[0].id}&right=${items[1].id}` as Route)
       : null;
 
   return (
     <div className="mt-4 panel panel-strong px-5 py-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
-          <p className="text-[0.78rem] font-medium uppercase tracking-[0.12em] text-[var(--muted)]">
+          <p className="type-mono text-[0.78rem] font-medium uppercase tracking-[0.12em] text-[var(--muted)]">
             Compare mode
           </p>
           <p className="text-sm leading-6 text-[var(--muted)]">
@@ -42,17 +43,18 @@ export function CompareBanner() {
 
         <div className="flex flex-wrap gap-3">
           {compareHref ? (
-            <Link
-              href={compareHref}
-              className="button-primary inline-flex px-4 py-2 text-sm font-semibold transition"
+            <button
+              type="button"
+              onClick={() => router.push(compareHref)}
+              className="button-primary inline-flex items-center justify-center px-4 py-2 text-sm font-semibold leading-none transition"
             >
               Compare selected
-            </Link>
+            </button>
           ) : null}
           <button
             type="button"
             onClick={clearCompare}
-            className="button-secondary px-4 py-2 text-sm font-semibold transition"
+            className="button-secondary inline-flex items-center justify-center px-4 py-2 text-sm font-semibold leading-none transition"
           >
             Clear compare
           </button>

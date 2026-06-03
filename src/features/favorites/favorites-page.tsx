@@ -57,21 +57,29 @@ function renderFavoritesContent(
   }
 
   return (
-    <div className="space-y-4">
-      {items.map((launch) => (
-        <LaunchCard
+    <div className="panel overflow-hidden">
+      {items.map((launch, index) => (
+        <div
           key={launch.id}
-          launch={launch}
-          actionSlot={
-            <button
-              type="button"
-              onClick={() => removeFavorite(launch.id)}
-              className="button-secondary px-4 py-2 text-sm font-semibold transition hover:border-[var(--danger)] hover:text-[var(--danger)]"
-            >
-              Remove
-            </button>
+          className={
+            index === items.length - 1
+              ? undefined
+              : "border-b border-[var(--border)]"
           }
-        />
+        >
+          <LaunchCard
+            launch={launch}
+            actionSlot={
+              <button
+                type="button"
+                onClick={() => removeFavorite(launch.id)}
+                className="button-secondary px-4 py-2 text-sm font-semibold transition hover:border-[var(--danger)] hover:text-[var(--danger)]"
+              >
+                Remove
+              </button>
+            }
+          />
+        </div>
       ))}
     </div>
   );

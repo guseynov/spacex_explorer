@@ -67,12 +67,12 @@ function BadgePill({
 }) {
   return (
     <div className="space-y-1">
-      <p className="text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[var(--muted)]">
+      <p className="type-mono text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[var(--muted)]">
         {label}
       </p>
       <span
         className={clsx(
-          "inline-flex items-center rounded-full border px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.08em]",
+          "type-mono inline-flex items-center rounded-full border px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.08em]",
           toneClasses[tone],
         )}
       >

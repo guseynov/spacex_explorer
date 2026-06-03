@@ -1,7 +1,7 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { useDebounce } from "use-debounce";
 import { EmptyState } from "@/components/empty-state";
 import { RetryState } from "@/components/retry-state";
@@ -26,21 +26,7 @@ import { VirtualizedLaunchList } from "./virtualized-launch-list";
 export function LaunchesExplorer() {
   const { filters, setFilters, resetFilters } = useLaunchFilters();
   const [debouncedSearch] = useDebounce(filters.search, 300);
-  const querySignature = useMemo(
-    () =>
-      JSON.stringify({
-        timing: filters.timing,
-        result: filters.result,
-        from: filters.from,
-        to: filters.to,
-        sort: filters.sort,
-        search: debouncedSearch,
-      }),
-    [debouncedSearch, filters],
-  );
-  const previousSignatureRef = useRef(querySignature);
   const emptyResetButtonRef = useRef<HTMLButtonElement | null>(null);
-  const retryButtonRef = useRef<HTMLButtonElement | null>(null);
 
   const query = useInfiniteQuery({
     queryKey: ["launches", { ...filters, search: debouncedSearch }],
@@ -63,28 +49,20 @@ export function LaunchesExplorer() {
       : `${launches.length} launch${launches.length === 1 ? "" : "es"} shown`;
 
   useEffect(() => {
-    if (query.isError) {
-      retryButtonRef.current?.focus();
-      previousSignatureRef.current = querySignature;
-      return;
-    }
-
     if (!query.data || query.isPending || query.isFetchingNextPage) {
       return;
     }
 
     if (launches.length === 0) {
       emptyResetButtonRef.current?.focus();
-      previousSignatureRef.current = querySignature;
-      return;
     }
-  }, [launches.length, query.data, query.isError, query.isFetchingNextPage, query.isPending, querySignature]);
+  }, [launches.length, query.data, query.isFetchingNextPage, query.isPending]);
 
   return (
-    <div className="flex flex-col space-y-8 xl:h-full xl:min-h-0">
-      <div className="grid gap-6 xl:h-full xl:min-h-0 xl:grid-cols-[380px_minmax(0,1fr)] xl:items-start">
-        <aside className="xl:sticky xl:top-0 xl:self-start">
-          <div className="xl:max-h-full xl:overflow-y-auto xl:pr-3 scroll-shell">
+    <div className="flex min-h-full flex-col gap-8 xl:h-full xl:min-h-0">
+      <div className="grid gap-6 xl:h-full xl:min-h-0 xl:grid-cols-[380px_minmax(0,1fr)] xl:items-stretch">
+        <aside className="xl:h-full xl:min-h-0">
+          <div className="scroll-shell xl:h-full xl:min-h-0 xl:overflow-y-auto xl:pr-3">
             <FilterBar
               filters={filters}
               onChange={setFilters}
@@ -95,13 +73,34 @@ export function LaunchesExplorer() {
 
         <section
           aria-busy={query.isPending || query.isFetchingNextPage}
-          className="flex min-w-0 flex-col space-y-4 xl:h-full xl:min-h-0 xl:max-h-full"
+          className="flex min-h-0 min-w-0 flex-col gap-4 xl:h-full xl:max-h-full"
         >
-          <div
-            aria-live="polite"
-            className="pr-4 text-[0.82rem] font-medium text-[var(--muted)]"
-          >
-            {loadingMessage}
+          <div className="flex flex-col gap-3 border-b border-[var(--border)] pb-3 lg:flex-row lg:items-center lg:justify-between">
+            <div
+              aria-live="polite"
+              className="pr-4 text-[0.8rem] font-medium text-[var(--muted)]"
+            >
+              {loadingMessage}
+            </div>
+
+            <label className="flex min-w-0 flex-col gap-1.5 text-sm text-[var(--muted)] sm:min-w-[13.5rem]">
+              <span className="text-[0.74rem] font-medium uppercase tracking-[0.12em]">
+                Sort list
+              </span>
+              <select
+                value={filters.sort}
+                onChange={(event) =>
+                  setFilters({ sort: event.target.value as SortOption })
+                }
+                className="control-input control-select w-full px-4 py-2.5 text-sm"
+              >
+                {Object.entries(sortLabels).map(([value, label]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
           {query.isError ? (
             <RetryState
@@ -114,7 +113,6 @@ export function LaunchesExplorer() {
               launches={launches}
               query={query}
               filters={filters}
-              setFilters={setFilters}
               resetFilters={resetFilters}
               loadNextPage={loadNextPage}
               emptyResetButtonRef={emptyResetButtonRef}
@@ -141,7 +139,6 @@ function ExplorerContent({
   launches,
   query,
   filters,
-  setFilters,
   resetFilters,
   loadNextPage,
   emptyResetButtonRef,
@@ -152,7 +149,6 @@ function ExplorerContent({
     "isPending" | "isFetchNextPageError" | "hasNextPage" | "isFetchingNextPage"
   >;
   filters: LaunchesQueryParams;
-  setFilters: (next: Partial<LaunchesQueryParams>) => void;
   resetFilters: () => void;
   loadNextPage: () => void;
   emptyResetButtonRef: RefObject<HTMLButtonElement | null>;
@@ -188,12 +184,8 @@ function ExplorerContent({
   }
 
   return (
-    <div className="flex flex-col space-y-4 xl:h-full xl:min-h-0 xl:max-h-full">
-      <ResultsToolbar
-        filters={filters}
-        onChange={setFilters}
-        onReset={resetFilters}
-      />
+    <div className="flex min-h-0 flex-1 flex-col gap-0 xl:h-full xl:max-h-full">
+      <ResultsToolbar filters={filters} onReset={resetFilters} />
       <div className="md:hidden">
         <MobileLaunchList
           launches={launches}
@@ -307,39 +299,16 @@ function MobileLaunchList({
 
 function ResultsToolbar({
   filters,
-  onChange,
   onReset,
 }: {
   filters: LaunchesQueryParams;
-  onChange: (next: Partial<LaunchesQueryParams>) => void;
   onReset: () => void;
 }) {
   const activeFilters = getActiveFilterLabels(filters);
 
   return (
     <div className="flex flex-col gap-4 px-0 py-0">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <label className="flex min-w-0 flex-col gap-2 text-sm text-[var(--muted)] sm:min-w-[15rem]">
-          <span className="text-[0.78rem] font-medium uppercase tracking-[0.12em]">
-            Sort list
-          </span>
-          <select
-            value={filters.sort}
-            onChange={(event) =>
-              onChange({ sort: event.target.value as SortOption })
-            }
-            className="control-input control-select w-full px-4 py-3 text-sm"
-          >
-            {Object.entries(sortLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <div className="flex flex-col gap-3 border-t border-[var(--border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           {activeFilters.length > 0 ? (
             activeFilters.map((label) => (
@@ -357,7 +326,7 @@ function ResultsToolbar({
           <button
             type="button"
             onClick={onReset}
-            className="button-secondary self-start px-4 py-2 text-sm font-semibold transition sm:self-auto"
+            className="button-secondary mt-2 self-start px-4 py-2 text-sm font-semibold transition sm:mt-1 sm:self-auto"
           >
             Reset all filters
           </button>

@@ -39,20 +39,20 @@ export function LaunchCard({
   }
 
   return (
-    <article className="panel group relative px-5 py-5 sm:px-6">
+    <article className="group relative px-5 py-5 transition-colors hover:bg-[var(--surface-strong)] sm:px-6">
       <div className="relative z-10 flex h-full flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <Link
           href={`/launches/${launch.id}` as Route}
           aria-label={`Open details for ${launch.name}`}
           className="flex min-w-0 flex-1 gap-4 text-left focus-visible:outline-none"
         >
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-[var(--border)] bg-[var(--surface-strong)]">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-[var(--border)] bg-[var(--surface-strong)]">
             {patchContent}
           </div>
 
-          <div className="min-w-0 space-y-3.5">
+          <div className="flex min-w-0 flex-col gap-3.5">
             <LaunchStatusBadges upcoming={launch.upcoming} success={launch.success} />
-            <div className="space-y-2.5">
+            <div className="flex flex-col gap-2.5">
               <h2 className="text-[1.5rem] font-semibold tracking-[-0.028em] text-foreground transition group-hover:text-[var(--accent-strong)] sm:text-[1.65rem]">
                 {launch.name}
               </h2>

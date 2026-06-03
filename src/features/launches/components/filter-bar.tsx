@@ -25,12 +25,12 @@ export function FilterBar({
   return (
     <>
       <form
-        className="space-y-3 xl:hidden"
+        className="flex flex-col gap-3 xl:hidden"
         onSubmit={(event) => event.preventDefault()}
       >
         <section className="control-shell px-4 py-4">
           <div className="mb-4 flex items-start justify-between gap-4">
-            <div className="space-y-1">
+            <div className="flex flex-col gap-1">
               <p className="text-[0.92rem] font-semibold tracking-[-0.01em] text-[var(--info)]">
                 Find launches
               </p>
@@ -45,13 +45,13 @@ export function FilterBar({
               </button>
             ) : null}
           </div>
-          <div className="space-y-6">
+          <div className="flex flex-col gap-6">
             <SearchField filters={filters} onChange={onChange} />
-            <div className="space-y-3.5">
+            <div className="flex flex-col gap-3.5">
               <span className="text-[0.78rem] font-medium text-[var(--muted)]">
                 Timing
               </span>
-              <TimingChips filters={filters} onChange={onChange} compact />
+              <TimingChips filters={filters} onChange={onChange} />
             </div>
           </div>
         </section>
@@ -82,7 +82,7 @@ export function FilterBar({
               )}
             </div>
           </summary>
-          <div className="space-y-5 border-t border-[var(--border)] px-4 py-4">
+          <div className="flex flex-col gap-5 border-t border-[var(--border)] px-4 py-4">
             <p className="text-[0.88rem] font-semibold tracking-[-0.01em] text-foreground">
               Result and date
             </p>
@@ -119,10 +119,10 @@ export function FilterBar({
         </summary>
 
         <form
-          className="space-y-6 border-t border-[var(--border)] px-5 py-5 sm:px-6"
+          className="flex flex-col gap-6 border-t border-[var(--border)] px-5 py-5 sm:px-6"
           onSubmit={(event) => event.preventDefault()}
         >
-          <section className="space-y-6">
+          <section className="flex flex-col gap-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <h2 className="text-[0.95rem] font-semibold tracking-[-0.01em] text-foreground">
                 Find a launch
@@ -136,7 +136,7 @@ export function FilterBar({
               </button>
             </div>
             <SearchField filters={filters} onChange={onChange} />
-            <div className="space-y-3.5">
+            <div className="flex flex-col gap-3.5">
               <span className="text-[0.78rem] font-medium text-[var(--muted)]">
                 Timing
               </span>
@@ -144,7 +144,7 @@ export function FilterBar({
             </div>
           </section>
 
-          <section className="space-y-4 border-t border-[var(--border)] pt-5">
+          <section className="flex flex-col gap-4 border-t border-[var(--border)] pt-5">
             <h2 className="text-[0.95rem] font-semibold tracking-[-0.01em] text-foreground">
               Refine the set
             </h2>
@@ -168,7 +168,7 @@ function SearchField({
   onChange: (next: Partial<LaunchesQueryParams>) => void;
 }) {
   return (
-    <label className="space-y-4">
+    <label className="flex flex-col gap-4">
       <span className="text-[0.78rem] font-medium text-[var(--muted)]">
         Mission search
       </span>
@@ -187,14 +187,12 @@ function SearchField({
 function TimingChips({
   filters,
   onChange,
-  compact = false,
 }: {
   filters: LaunchesQueryParams;
   onChange: (next: Partial<LaunchesQueryParams>) => void;
-  compact?: boolean;
 }) {
   return (
-    <div className={`grid gap-2 ${compact ? "grid-cols-3" : "grid-cols-3"}`}>
+    <div className="grid grid-cols-3 gap-2">
       <FilterChip
         active={filters.timing === LaunchTiming.All}
         onClick={() => onChange({ timing: LaunchTiming.All })}
@@ -235,7 +233,7 @@ function FilterFields({
   return (
     <div className="grid gap-6">
       {showField("result") ? (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <span className="text-[0.78rem] font-medium text-[var(--muted)]">
             Result
           </span>
@@ -266,13 +264,13 @@ function FilterFields({
       ) : null}
 
       {showField("from") || showField("to") ? (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <span className="text-[0.78rem] font-medium text-[var(--muted)]">
             Launch window
           </span>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
             {showField("from") ? (
-              <label className="space-y-4">
+              <label className="flex flex-col gap-4">
                 <span className="text-[0.76rem] font-medium text-[var(--muted)]">
                   From
                 </span>
@@ -285,7 +283,7 @@ function FilterFields({
               </label>
             ) : null}
             {showField("to") ? (
-              <label className="space-y-4">
+              <label className="flex flex-col gap-4">
                 <span className="text-[0.76rem] font-medium text-[var(--muted)]">
                   To
                 </span>
@@ -319,6 +317,8 @@ function FilterChip({
     <button
       type="button"
       disabled={disabled}
+      aria-pressed={active}
+      data-active={active ? "true" : "false"}
       onClick={onClick}
       className={`filter-chip ${active ? "filter-chip-active" : ""}`}
     >
