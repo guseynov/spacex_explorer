@@ -155,7 +155,7 @@ function ExplorerContent({
 }) {
   if (query.isPending) {
     return (
-      <div className="space-y-4">
+      <div className="panel overflow-hidden">
         {Array.from({ length: 4 }, (_, index) => (
           <LaunchCardSkeleton key={index} />
         ))}
@@ -190,7 +190,7 @@ function ExplorerContent({
         <MobileLaunchList
           launches={launches}
           actionRenderer={(launch) => (
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
               <FavoriteToggleButton launch={launch} />
               <CompareToggleButton launch={launch} />
             </div>
@@ -204,7 +204,7 @@ function ExplorerContent({
         <VirtualizedLaunchList
           launches={launches}
           actionRenderer={(launch) => (
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
               <FavoriteToggleButton launch={launch} />
               <CompareToggleButton launch={launch} />
             </div>
@@ -278,18 +278,26 @@ function MobileLaunchList({
   }, [hasNextPage, isFetchingNextPage, launches.length, onLoadMore]);
 
   return (
-    <div className="space-y-4">
-      {launches.map((launch) => (
-        <LaunchCard
+    <div className="panel overflow-hidden">
+      {launches.map((launch, index) => (
+        <div
           key={launch.id}
-          launch={launch}
-          actionSlot={actionRenderer?.(launch)}
-        />
+          className={
+            index < launches.length - 1
+              ? "border-b border-[var(--border)]"
+              : undefined
+          }
+        >
+          <LaunchCard
+            launch={launch}
+            actionSlot={actionRenderer?.(launch)}
+          />
+        </div>
       ))}
       {hasNextPage ? (
         <div ref={sentinelRef} className="h-8" aria-hidden="true" />
       ) : (
-        <p className="px-1 py-4 text-center text-sm text-[var(--muted)]">
+        <p className="px-5 py-4 text-center text-sm text-[var(--muted)]">
           You&apos;ve reached the end of the current launch results.
         </p>
       )}

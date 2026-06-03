@@ -140,86 +140,112 @@ function BarChart({ data }: { data: YearStat[] }) {
 
   return (
     <figure className="space-y-3">
-      <div className="overflow-x-auto pb-2">
-      <svg
-        width={chartWidth}
-        viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
-        className="block h-auto"
-        role="img"
-        aria-label="Bar chart showing the number of launches for each year"
-      >
-        <line
-          x1={MARGIN.left}
-          y1={baselineY}
-          x2={chartWidth - MARGIN.right}
-          y2={baselineY}
-          stroke="var(--border-strong)"
-          strokeWidth="1"
-        />
+      <div className="hidden overflow-x-auto pb-2 md:block">
+        <svg
+          width={chartWidth}
+          viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
+          className="block h-auto"
+          role="img"
+          aria-label="Bar chart showing the number of launches for each year"
+        >
+          <line
+            x1={MARGIN.left}
+            y1={baselineY}
+            x2={chartWidth - MARGIN.right}
+            y2={baselineY}
+            stroke="var(--border-strong)"
+            strokeWidth="1"
+          />
 
-        {[0, 0.5, 1].map((step) => {
-          const y = MARGIN.top + plotHeight - plotHeight * step;
+          {[0, 0.5, 1].map((step) => {
+            const y = MARGIN.top + plotHeight - plotHeight * step;
+            return (
+              <g key={step}>
+                <line
+                  x1={MARGIN.left}
+                  y1={y}
+                  x2={chartWidth - MARGIN.right}
+                  y2={y}
+                  stroke="var(--border)"
+                  strokeWidth="1"
+                  strokeDasharray="4 5"
+                />
+                <text
+                  x={MARGIN.left - 10}
+                  y={y + 4}
+                  textAnchor="end"
+                  fill="var(--muted)"
+                  className="text-[10px] font-medium"
+                >
+                  {Math.round(maxLaunches * step)}
+                </text>
+              </g>
+            );
+          })}
+
+          {data.map((item, index) => {
+            const centerX = MARGIN.left + slotWidth * index + slotWidth / 2;
+            const barHeight = (item.totalLaunches / maxLaunches) * plotHeight;
+            const barY = baselineY - barHeight;
+
+            return (
+              <g key={item.year}>
+                <rect
+                  x={centerX - barWidth / 2}
+                  y={barY}
+                  width={barWidth}
+                  height={Math.max(barHeight, 4)}
+                  rx="10"
+                  fill="var(--accent)"
+                />
+                <text
+                  x={centerX}
+                  y={Math.max(barY - 8, 18)}
+                  textAnchor="middle"
+                  fill="var(--foreground)"
+                  className="text-[11px] font-semibold"
+                >
+                  {item.totalLaunches} launches
+                </text>
+                <text
+                  x={centerX}
+                  y={baselineY + 20}
+                  textAnchor="middle"
+                  fill="var(--muted)"
+                  className="text-[11px] font-medium"
+                >
+                  {item.year}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+
+      <div className="flex flex-col gap-2 md:hidden">
+        {data.map((item) => {
+          const launchShare = (item.totalLaunches / maxLaunches) * 100;
+
           return (
-            <g key={step}>
-              <line
-                x1={MARGIN.left}
-                y1={y}
-                x2={chartWidth - MARGIN.right}
-                y2={y}
-                stroke="var(--border)"
-                strokeWidth="1"
-                strokeDasharray="4 5"
-              />
-              <text
-                x={MARGIN.left - 10}
-                y={y + 4}
-                textAnchor="end"
-                fill="var(--muted)"
-                className="text-[10px] font-medium"
-              >
-                {Math.round(maxLaunches * step)}
-              </text>
-            </g>
-          );
-        })}
-
-        {data.map((item, index) => {
-          const centerX = MARGIN.left + slotWidth * index + slotWidth / 2;
-          const barHeight = (item.totalLaunches / maxLaunches) * plotHeight;
-          const barY = baselineY - barHeight;
-
-          return (
-            <g key={item.year}>
-              <rect
-                x={centerX - barWidth / 2}
-                y={barY}
-                width={barWidth}
-                height={Math.max(barHeight, 4)}
-                rx="10"
-                fill="var(--accent)"
-              />
-              <text
-                x={centerX}
-                y={Math.max(barY - 8, 18)}
-                textAnchor="middle"
-                fill="var(--foreground)"
-                className="text-[11px] font-semibold"
-              >
-                {item.totalLaunches} launches
-              </text>
-              <text
-                x={centerX}
-                y={baselineY + 20}
-                textAnchor="middle"
-                fill="var(--muted)"
-                className="text-[11px] font-medium"
-              >
+            <div
+              key={item.year}
+              className="grid grid-cols-[3.5rem_minmax(0,1fr)_3.75rem] items-center gap-3"
+            >
+              <span className="text-[0.78rem] font-medium text-[var(--muted)]">
                 {item.year}
-              </text>
-            </g>
+              </span>
+              <div className="h-3 overflow-hidden rounded-full border border-[var(--border)] bg-[var(--surface)]">
+                <div
+                  className="h-full rounded-full bg-[var(--accent)]"
+                  style={{ width: `${launchShare}%` }}
+                />
+              </div>
+              <span className="text-right text-[0.82rem] font-semibold text-[var(--foreground)]">
+                {item.totalLaunches}
+              </span>
+            </div>
           );
         })}
-      </svg>
       </div>
     </figure>
   );
@@ -251,84 +277,106 @@ function LineChart({ data }: { data: YearStat[] }) {
 
   return (
     <figure className="space-y-3">
-      <div className="overflow-x-auto pb-2">
-      <svg
-        width={chartWidth}
-        viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
-        className="block h-auto"
-        role="img"
-        aria-label="Line chart showing the yearly launch success rate"
-      >
-        <line
-          x1={MARGIN.left}
-          y1={MARGIN.top + plotHeight}
-          x2={chartWidth - MARGIN.right}
-          y2={MARGIN.top + plotHeight}
-          stroke="var(--border-strong)"
-          strokeWidth="1"
-        />
+      <div className="hidden overflow-x-auto pb-2 md:block">
+        <svg
+          width={chartWidth}
+          viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
+          className="block h-auto"
+          role="img"
+          aria-label="Line chart showing the yearly launch success rate"
+        >
+          <line
+            x1={MARGIN.left}
+            y1={MARGIN.top + plotHeight}
+            x2={chartWidth - MARGIN.right}
+            y2={MARGIN.top + plotHeight}
+            stroke="var(--border-strong)"
+            strokeWidth="1"
+          />
 
-        {[0, 25, 50, 75, 100].map((tick) => {
-          const y = MARGIN.top + plotHeight - (tick / 100) * plotHeight;
-          return (
-            <g key={tick}>
-              <line
-                x1={MARGIN.left}
-                y1={y}
-                x2={chartWidth - MARGIN.right}
-                y2={y}
-                stroke="var(--border)"
-                strokeWidth="1"
-                strokeDasharray="4 5"
-              />
+          {[0, 25, 50, 75, 100].map((tick) => {
+            const y = MARGIN.top + plotHeight - (tick / 100) * plotHeight;
+            return (
+              <g key={tick}>
+                <line
+                  x1={MARGIN.left}
+                  y1={y}
+                  x2={chartWidth - MARGIN.right}
+                  y2={y}
+                  stroke="var(--border)"
+                  strokeWidth="1"
+                  strokeDasharray="4 5"
+                />
+                <text
+                  x={MARGIN.left - 10}
+                  y={y + 4}
+                  textAnchor="end"
+                  fill="var(--muted)"
+                  className="text-[10px] font-medium"
+                >
+                  {tick}%
+                </text>
+              </g>
+            );
+          })}
+
+          <path d={areaPath} fill="rgba(255, 255, 255, 0.06)" />
+          <path
+            d={linePath}
+            fill="none"
+            stroke="var(--success)"
+            strokeWidth="3"
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
+
+          {points.map((point) => (
+            <g key={point.year}>
+              <circle cx={point.x} cy={point.y} r="5.5" fill="var(--success)" />
+              <circle cx={point.x} cy={point.y} r="10" fill="rgba(255, 255, 255, 0.08)" />
               <text
-                x={MARGIN.left - 10}
-                y={y + 4}
-                textAnchor="end"
-                fill="var(--muted)"
-                className="text-[10px] font-medium"
+                x={point.x}
+                y={Math.max(point.y - 10, 18)}
+                textAnchor="middle"
+                fill="var(--foreground)"
+                className="text-[11px] font-semibold"
               >
-                {tick}%
+                {Math.round(point.successRate)}%
+              </text>
+              <text
+                x={point.x}
+                y={MARGIN.top + plotHeight + 20}
+                textAnchor="middle"
+                fill="var(--muted)"
+                className="text-[11px] font-medium"
+              >
+                {point.year}
               </text>
             </g>
-          );
-        })}
+          ))}
+        </svg>
+      </div>
 
-        <path d={areaPath} fill="rgba(255, 255, 255, 0.06)" />
-        <path
-          d={linePath}
-          fill="none"
-          stroke="var(--success)"
-          strokeWidth="3"
-          strokeLinejoin="round"
-          strokeLinecap="round"
-        />
-
+      <div className="flex flex-col gap-2 md:hidden">
         {points.map((point) => (
-          <g key={point.year}>
-            <circle cx={point.x} cy={point.y} r="5.5" fill="var(--success)" />
-            <circle cx={point.x} cy={point.y} r="10" fill="rgba(255, 255, 255, 0.08)" />
-            <text
-              x={point.x}
-              y={Math.max(point.y - 10, 18)}
-              textAnchor="middle"
-              fill="var(--foreground)"
-              className="text-[11px] font-semibold"
-            >
-              {Math.round(point.successRate)}%
-            </text>
-            <text
-              x={point.x}
-              y={MARGIN.top + plotHeight + 20}
-              textAnchor="middle"
-              fill="var(--muted)"
-              className="text-[11px] font-medium"
-            >
+          <div
+            key={point.year}
+            className="grid grid-cols-[3.5rem_minmax(0,1fr)_3.75rem] items-center gap-3"
+          >
+            <span className="text-[0.78rem] font-medium text-[var(--muted)]">
               {point.year}
-            </text>
-          </g>
+            </span>
+            <div className="h-3 overflow-hidden rounded-full border border-[var(--border)] bg-[var(--surface)]">
+              <div
+                className="h-full rounded-full bg-[var(--success)]"
+                style={{ width: `${point.successRate}%` }}
+              />
+            </div>
+            <span className="text-right text-[0.82rem] font-semibold text-[var(--foreground)]">
+              {Math.round(point.successRate)}%
+            </span>
+          </div>
         ))}
-      </svg>
       </div>
     </figure>
   );

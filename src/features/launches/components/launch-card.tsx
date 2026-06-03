@@ -35,7 +35,7 @@ export function LaunchCard({
   let actionContent: React.ReactNode = null;
 
   if (actionSlot) {
-    actionContent = <div className="shrink-0">{actionSlot}</div>;
+    actionContent = actionSlot;
   }
 
   return (
@@ -66,7 +66,7 @@ export function LaunchCard({
           </div>
         </Link>
 
-        <div className="relative z-20 flex items-center justify-end pointer-events-auto lg:pl-4">
+        <div className="relative z-20 flex w-full items-stretch pointer-events-auto lg:w-auto lg:justify-end lg:pl-4">
           {actionContent}
         </div>
       </div>

@@ -27,7 +27,7 @@ export function FavoriteToggleButton({
       aria-label={ariaLabel}
       onClick={() => toggleFavorite(launch)}
       className={clsx(
-        "inline-flex items-center gap-2 border px-3.5 py-2 text-[0.86rem] font-medium transition",
+        "inline-flex w-full items-center justify-center gap-2 border px-3.5 py-2 text-[0.86rem] font-medium transition sm:w-auto",
         buttonClasses,
       )}
     >

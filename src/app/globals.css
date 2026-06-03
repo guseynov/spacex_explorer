@@ -220,7 +220,7 @@ select {
 
 .launch-list-shell {
   border: 1px solid var(--border);
-  background: var(--panel);
+  background: var(--panel-strong);
 }
 
 .text-balance {
