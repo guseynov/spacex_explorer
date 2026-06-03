@@ -17,13 +17,19 @@ import {
   type SortOption,
   toFavoriteLaunch,
 } from "@/lib/api/query-builder";
+import type { LaunchesPage } from "@/lib/api/schemas";
 import { useLaunchFilters } from "../use-launch-filters";
 import { FilterBar, sortLabels } from "./filter-bar";
 import { LaunchCard } from "./launch-card";
 import { LaunchCardSkeleton } from "./launch-card-skeleton";
 import { VirtualizedLaunchList } from "./virtualized-launch-list";
+import type { InfiniteData } from "@tanstack/react-query";
 
-export function LaunchesExplorer() {
+export function LaunchesExplorer({
+  initialData,
+}: {
+  initialData?: InfiniteData<LaunchesPage, number>;
+}) {
   const { filters, setFilters, resetFilters } = useLaunchFilters();
   const [debouncedSearch] = useDebounce(filters.search, 300);
   const emptyResetButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -33,6 +39,7 @@ export function LaunchesExplorer() {
     queryFn: ({ pageParam }) =>
       fetchLaunchesPage({ ...filters, search: debouncedSearch }, pageParam),
     initialPageParam: 1,
+    initialData,
     getNextPageParam,
     staleTime: 60_000,
   });

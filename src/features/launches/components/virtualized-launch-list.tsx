@@ -12,7 +12,6 @@ import type { FavoriteLaunch } from "@/lib/api/schemas";
 import { LaunchCard } from "./launch-card";
 
 const DEFAULT_ROW_HEIGHT = 196;
-const ROW_PADDING_INLINE_END = 16;
 const DEFAULT_LIST_HEIGHT = 720;
 const LOAD_MORE_THRESHOLD = 240;
 
@@ -36,7 +35,6 @@ function VirtualizedLaunchRow({
           ...style,
           width: "100%",
           boxSizing: "border-box",
-          paddingInlineEnd: ROW_PADDING_INLINE_END,
           borderBottom: index === launches.length - 1 ? "none" : "1px solid var(--border)",
         }}
       >
@@ -53,7 +51,6 @@ function VirtualizedLaunchRow({
         ...style,
         width: "100%",
         boxSizing: "border-box",
-        paddingInlineEnd: ROW_PADDING_INLINE_END,
         borderBottom:
           index === launches.length - 1 ? "none" : "1px solid var(--border)",
       }}
