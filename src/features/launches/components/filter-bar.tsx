@@ -1,8 +1,7 @@
 "use client";
 
 import {
-  defaultLaunchFilters,
-  LaunchSortOption,
+  countActiveLaunchFilters,
   type LaunchesQueryParams,
 } from "@/lib/api/query-builder";
 import { FilterControls } from "./filter-controls";
@@ -17,7 +16,7 @@ export function FilterBar({
   onChange: (next: Partial<LaunchesQueryParams>) => void;
   onClear: () => void;
 }) {
-  const hasAnyFilters = hasActiveFilters(filters);
+  const hasAnyFilters = countActiveLaunchFilters(filters) > 0;
 
   return (
     <>
@@ -67,21 +66,3 @@ export function FilterBar({
     </>
   );
 }
-
-function hasActiveFilters(filters: LaunchesQueryParams) {
-  return (
-    filters.search !== defaultLaunchFilters.search ||
-    filters.timing !== defaultLaunchFilters.timing ||
-    filters.result !== defaultLaunchFilters.result ||
-    filters.from !== defaultLaunchFilters.from ||
-    filters.to !== defaultLaunchFilters.to ||
-    filters.sort !== defaultLaunchFilters.sort
-  );
-}
-
-export const sortLabels = {
-  [LaunchSortOption.DateDesc]: "Newest first",
-  [LaunchSortOption.DateAsc]: "Oldest first",
-  [LaunchSortOption.NameAsc]: "Mission name: A-Z",
-  [LaunchSortOption.NameDesc]: "Mission name: Z-A",
-} as const;

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { LaunchDetailScreen } from "@/features/launches/components/launch-detail-screen";
 import { fetchLaunchById } from "@/lib/api/client";
 import { LaunchApiError } from "@/lib/api/errors";
+import type { Launch } from "@/lib/api/schemas";
 
 export const metadata: Metadata = {
   title: "Launch Detail",
@@ -13,8 +14,7 @@ export default async function LaunchDetailPage(
 ) {
   const params = await props.params;
   const launchId = params.id;
-
-  let launch;
+  let launch: Launch;
 
   try {
     launch = await fetchLaunchById(launchId);

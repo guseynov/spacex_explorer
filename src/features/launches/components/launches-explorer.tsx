@@ -6,14 +6,14 @@ import { useDebounce } from "use-debounce";
 import { RetryState } from "@/components/retry-state";
 import { fetchLaunchesPage } from "@/lib/api/client";
 import {
-  defaultLaunchFilters,
-  type LaunchesQueryParams,
+  countActiveLaunchFilters,
   type SortOption,
   toFavoriteLaunch,
 } from "@/lib/api/query-builder";
 import type { LaunchesPage } from "@/lib/api/schemas";
 import { useLaunchFilters } from "../use-launch-filters";
-import { FilterBar, sortLabels } from "./filter-bar";
+import { FilterBar } from "./filter-bar";
+import { sortLabels } from "./sort-labels";
 import { ExplorerContent } from "./explorer-content";
 
 export function LaunchesExplorer({
@@ -39,7 +39,7 @@ export function LaunchesExplorer({
   const launches = pages.flatMap((page) => page.results).map(toFavoriteLaunch);
   const retryInitialLoad = () => query.refetch();
   const loadNextPage = () => query.fetchNextPage();
-  const activeFilterCount = countActiveFilters(filters);
+  const activeFilterCount = countActiveLaunchFilters(filters);
   const loadingMessage = query.isPending
     ? "Loading launch list..."
     : activeFilterCount > 0
@@ -135,30 +135,4 @@ function getNextPageParam(
   }
 
   return allPages.length + 1;
-}
-
-function countActiveFilters(filters: LaunchesQueryParams) {
-  let count = 0;
-
-  if (filters.search !== defaultLaunchFilters.search) {
-    count += 1;
-  }
-
-  if (filters.timing !== defaultLaunchFilters.timing) {
-    count += 1;
-  }
-
-  if (filters.result !== defaultLaunchFilters.result) {
-    count += 1;
-  }
-
-  if (filters.from || filters.to) {
-    count += 1;
-  }
-
-  if (filters.sort !== defaultLaunchFilters.sort) {
-    count += 1;
-  }
-
-  return count;
 }

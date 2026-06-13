@@ -71,41 +71,37 @@ type LaunchYearStats = {
   successLaunches: number;
 };
 
-export async function fetchLaunchYearStats(
-  years: number[],
-): Promise<LaunchYearStats[]> {
-  if (years.length === 0) {
-    return [];
+export async function fetchLaunchYearStats(): Promise<LaunchYearStats[]> {
+  const launches = await fetchTrendLaunches();
+  const statsByYear = new Map<number, LaunchYearStats>();
+
+  for (const launch of launches) {
+    const year = new Date(launch.net).getUTCFullYear();
+    const existing = statsByYear.get(year);
+
+    if (existing) {
+      existing.totalLaunches += 1;
+      existing.successLaunches += launch.status.id === 3 ? 1 : 0;
+      continue;
+    }
+
+    statsByYear.set(year, {
+      year,
+      totalLaunches: 1,
+      successLaunches: launch.status.id === 3 ? 1 : 0,
+    });
   }
 
-  const launches = await fetchTrendLaunches(years);
-
-  return years.map((year) => {
-    const launchesForYear = launches.filter(
-      (launch) => new Date(launch.net).getUTCFullYear() === year,
-    );
-
-    return {
-      year,
-      totalLaunches: launchesForYear.length,
-      successLaunches: launchesForYear.filter(
-        (launch) => launch.status.id === 3,
-      ).length,
-    };
-  });
+  return [...statsByYear.values()].sort((left, right) => left.year - right.year);
 }
 
-async function fetchTrendLaunches(years: number[]) {
-  const firstYear = Math.min(...years);
-  const lastYear = Math.max(...years);
+async function fetchTrendLaunches() {
   const limit = 100;
   const baseParams = new URLSearchParams({
     limit: String(limit),
     offset: "0",
     mode: "list",
     ordering: "net",
-    net__gte: `${firstYear}-01-01T00:00:00.000Z`,
-    net__lte: `${lastYear}-12-31T23:59:59.999Z`,
   });
   const firstPage = await requestJson(
     "/launches/",

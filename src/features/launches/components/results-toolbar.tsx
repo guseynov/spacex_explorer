@@ -1,5 +1,7 @@
-import { LaunchResult, LaunchSortOption, LaunchTiming, type LaunchesQueryParams } from "@/lib/api/query-builder";
-import { sortLabels } from "./filter-bar";
+import {
+  getActiveLaunchFilterLabels,
+  type LaunchesQueryParams,
+} from "@/lib/api/query-builder";
 
 export function ResultsToolbar({
   filters,
@@ -8,7 +10,7 @@ export function ResultsToolbar({
   filters: LaunchesQueryParams;
   onReset: () => void;
 }) {
-  const activeFilters = getActiveFilterLabels(filters);
+  const activeFilters = getActiveLaunchFilterLabels(filters);
 
   return (
     <div className="flex flex-col gap-4 px-0 py-0">
@@ -38,36 +40,4 @@ export function ResultsToolbar({
       </div>
     </div>
   );
-}
-
-function getActiveFilterLabels(filters: LaunchesQueryParams) {
-  const labels: string[] = [];
-
-  if (filters.search) {
-    labels.push(`Mission: ${filters.search}`);
-  }
-
-  if (filters.timing === LaunchTiming.Upcoming) {
-    labels.push("Upcoming");
-  } else if (filters.timing === LaunchTiming.Past) {
-    labels.push("Past");
-  }
-
-  if (filters.result === LaunchResult.Success) {
-    labels.push("Result: success");
-  } else if (filters.result === LaunchResult.Failure) {
-    labels.push("Result: failure");
-  }
-
-  if (filters.from || filters.to) {
-    labels.push(
-      `Dates: ${filters.from || "Any start"} to ${filters.to || "Any end"}`,
-    );
-  }
-
-  if (filters.sort !== LaunchSortOption.DateDesc) {
-    labels.push(`Sort: ${sortLabels[filters.sort]}`);
-  }
-
-  return labels;
 }

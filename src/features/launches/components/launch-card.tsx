@@ -14,30 +14,18 @@ export function LaunchCard({
   launch: FavoriteLaunch;
   actionSlot?: React.ReactNode;
 }) {
-  let patchContent = (
-    <span className="text-xs font-medium text-[var(--muted)]">
-      N/A
-    </span>
+  const patchContent = launch.imageUrl ? (
+    <Image
+      src={launch.imageUrl}
+      alt={`${launch.name} mission image`}
+      width={72}
+      height={72}
+      className="h-full w-full object-cover"
+      unoptimized
+    />
+  ) : (
+    <span className="text-xs font-medium text-[var(--muted)]">N/A</span>
   );
-
-  if (launch.imageUrl) {
-    patchContent = (
-      <Image
-        src={launch.imageUrl}
-        alt={`${launch.name} mission image`}
-        width={72}
-        height={72}
-        className="h-full w-full object-cover"
-        unoptimized
-      />
-    );
-  }
-
-  let actionContent: React.ReactNode = null;
-
-  if (actionSlot) {
-    actionContent = actionSlot;
-  }
 
   return (
     <article className="launch-row group px-4 py-4 sm:px-5">
@@ -74,7 +62,7 @@ export function LaunchCard({
         </Link>
 
         <div className="relative z-20 flex w-full items-stretch pointer-events-auto lg:w-auto lg:justify-end lg:pl-4">
-          {actionContent}
+          {actionSlot}
         </div>
       </div>
     </article>

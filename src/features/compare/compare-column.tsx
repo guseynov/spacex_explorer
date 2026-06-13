@@ -5,11 +5,10 @@ import { DetailLine } from "./detail-line";
 import { Metric } from "./metric";
 
 export function CompareColumn({
-  data,
+  data: launch,
 }: {
   data: Launch;
 }) {
-  const launch = data;
   const rocket = launch.rocket.configuration;
   const launchpad = launch.pad;
   const flightNumber =

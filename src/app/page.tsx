@@ -1,4 +1,3 @@
-import type { InfiniteData } from "@tanstack/react-query";
 import { RateLimitState } from "@/components/rate-limit-state";
 import { LaunchesExplorer } from "@/features/launches/components/launches-explorer";
 import { fetchLaunchesPage } from "@/lib/api/client";
@@ -31,14 +30,12 @@ export default async function HomePage(props: {
     throw error;
   }
 
-  const initialData: InfiniteData<LaunchesPage, number> = {
-    pages: [firstPage],
-    pageParams: [1],
-  };
-
   return (
     <LaunchesExplorer
-      initialData={initialData}
+      initialData={{
+        pages: [firstPage],
+        pageParams: [1],
+      }}
     />
   );
 }

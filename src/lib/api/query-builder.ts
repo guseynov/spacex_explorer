@@ -124,6 +124,42 @@ export function stringifyLaunchSearchParams(filters: LaunchesQueryParams) {
   return params;
 }
 
+export function countActiveLaunchFilters(filters: LaunchesQueryParams) {
+  return getActiveLaunchFilterLabels(filters).length;
+}
+
+export function getActiveLaunchFilterLabels(filters: LaunchesQueryParams) {
+  const labels: string[] = [];
+
+  if (filters.search) {
+    labels.push(`Mission: ${filters.search}`);
+  }
+
+  if (filters.timing === LaunchTiming.Upcoming) {
+    labels.push("Upcoming");
+  } else if (filters.timing === LaunchTiming.Past) {
+    labels.push("Past");
+  }
+
+  if (filters.result === LaunchResult.Success) {
+    labels.push("Result: success");
+  } else if (filters.result === LaunchResult.Failure) {
+    labels.push("Result: failure");
+  }
+
+  if (filters.from || filters.to) {
+    labels.push(
+      `Dates: ${filters.from || "Any start"} to ${filters.to || "Any end"}`,
+    );
+  }
+
+  if (filters.sort !== LaunchSortOption.DateDesc) {
+    labels.push(`Sort: ${getLaunchSortLabel(filters.sort)}`);
+  }
+
+  return labels;
+}
+
 export function buildLaunchLibraryQueryParams(
   filters: LaunchesQueryParams,
   page: number,
@@ -188,6 +224,20 @@ function getLaunchLibraryOrdering(sort: SortOption) {
     case LaunchSortOption.DateDesc:
     default:
       return "-net";
+  }
+}
+
+function getLaunchSortLabel(sort: SortOption) {
+  switch (sort) {
+    case LaunchSortOption.DateAsc:
+      return "Oldest first";
+    case LaunchSortOption.NameAsc:
+      return "Mission name: A-Z";
+    case LaunchSortOption.NameDesc:
+      return "Mission name: Z-A";
+    case LaunchSortOption.DateDesc:
+    default:
+      return "Newest first";
   }
 }
 
