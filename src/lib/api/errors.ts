@@ -1,10 +1,10 @@
-export class SpaceXApiError extends Error {
+export class LaunchApiError extends Error {
   constructor(
     message: string,
     public readonly status: number,
   ) {
     super(message);
-    this.name = "SpaceXApiError";
+    this.name = "LaunchApiError";
   }
 }
 
@@ -12,7 +12,7 @@ export function shouldRetryRequest(
   failureCount: number,
   error: Error,
 ) {
-  if (!(error instanceof SpaceXApiError)) {
+  if (!(error instanceof LaunchApiError)) {
     return failureCount < 2;
   }
 
@@ -26,4 +26,3 @@ export function shouldRetryRequest(
 export function retryDelay(attemptIndex: number) {
   return attemptIndex <= 0 ? 500 : 1000;
 }
-

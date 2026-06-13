@@ -12,12 +12,9 @@ import {
 const favorite: FavoriteLaunch = {
   id: "launch-1",
   name: "CRS-1",
-  date_utc: "2020-01-01T00:00:00.000Z",
-  success: true,
-  upcoming: false,
-  patch: "https://images2.imgbox.com/test.png",
-  rocketId: "rocket-1",
-  launchpadId: "launchpad-1",
+  net: "2020-01-01T00:00:00.000Z",
+  status: { id: 3, name: "Launch Successful", abbrev: "Success" },
+  imageUrl: "https://images2.imgbox.com/test.png",
 };
 
 describe("favorites reducer", () => {

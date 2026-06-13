@@ -1,12 +1,13 @@
 import { afterEach, beforeEach, vi } from "vitest";
 import {
-  buildLaunchesQueryPayload,
+  buildLaunchLibraryQueryParams,
   defaultLaunchFilters,
-  escapeMissionSearch,
   normalizeLaunchFilters,
   parseLaunchSearchParams,
   stringifyLaunchSearchParams,
+  toFavoriteLaunch,
 } from "./query-builder";
+import { launchSchema } from "./schemas";
 
 describe("query builder", () => {
   beforeEach(() => {
@@ -16,10 +17,6 @@ describe("query builder", () => {
 
   afterEach(() => {
     vi.useRealTimers();
-  });
-
-  it("escapes regex metacharacters in search input", () => {
-    expect(escapeMissionSearch("Starlink (v2)+")).toBe("Starlink \\(v2\\)\\+");
   });
 
   it("normalizes the result filter when upcoming is selected", () => {
@@ -35,12 +32,13 @@ describe("query builder", () => {
     });
   });
 
-  it("parses URL params into the filter contract", () => {
+  it("parses and stringifies URL filters", () => {
     const params = new URLSearchParams(
       "timing=past&result=success&from=2020-01-01&to=2020-12-31&sort=name_desc&search=falcon",
     );
+    const filters = parseLaunchSearchParams(params);
 
-    expect(parseLaunchSearchParams(params)).toEqual({
+    expect(filters).toEqual({
       timing: "past",
       result: "success",
       from: "2020-01-01",
@@ -48,77 +46,70 @@ describe("query builder", () => {
       sort: "name_desc",
       search: "falcon",
     });
+    expect(stringifyLaunchSearchParams(filters).toString()).toBe(
+      params.toString(),
+    );
   });
 
-  it("stringifies only non-default filters", () => {
-    const params = stringifyLaunchSearchParams({
-      ...defaultLaunchFilters,
-      timing: "past",
-      search: "falcon",
-    });
-
-    expect(params.toString()).toBe("timing=past&search=falcon");
-  });
-
-  it("builds the SpaceX query payload for server-side pagination and filtering", () => {
-    expect(
-      buildLaunchesQueryPayload(
-        {
-          timing: "upcoming",
-          result: "all",
-          from: "2020-01-01",
-          to: "2020-12-31",
-          sort: "name_asc",
-          search: "Starlink (v2)+",
-        },
-        3,
-      ),
-    ).toEqual({
-      query: {
-        upcoming: true,
-        date_utc: {
-          $gte: "2020-01-01T00:00:00.000Z",
-          $lte: "2020-12-31T23:59:59.999Z",
-        },
-        name: {
-          $regex: "Starlink \\(v2\\)\\+",
-          $options: "i",
-        },
+  it("builds Launch Library pagination and filters", () => {
+    const params = buildLaunchLibraryQueryParams(
+      {
+        timing: "past",
+        result: "failure",
+        from: "2020-01-01",
+        to: "2020-12-31",
+        sort: "name_desc",
+        search: "Starlink (v2)+",
       },
-      options: {
-        page: 3,
-        limit: 12,
-        sort: {
-          name: "asc",
-        },
-      },
+      3,
+    );
+
+    expect(Object.fromEntries(params)).toEqual({
+      lsp__id: "121",
+      limit: "12",
+      offset: "24",
+      mode: "normal",
+      ordering: "-name",
+      net__gte: "2020-01-01T00:00:00.000Z",
+      net__lte: "2020-12-31T23:59:59.999Z",
+      status__ids: "4,7",
+      search: "Starlink (v2)+",
     });
   });
 
-  it("builds the past launches query using the upcoming flag", () => {
-    expect(
-      buildLaunchesQueryPayload(
-        {
-          timing: "past",
-          result: "all",
-          from: "",
-          to: "",
-          sort: "date_desc",
-          search: "",
-        },
-        1,
-      ),
-    ).toEqual({
-      query: {
-        upcoming: false,
+  it("uses the current time as the upcoming lower bound", () => {
+    const params = buildLaunchLibraryQueryParams(
+      { ...defaultLaunchFilters, timing: "upcoming" },
+      1,
+    );
+
+    expect(params.get("net__gte")).toBe("2026-06-02T00:00:00.000Z");
+  });
+
+  it("creates the local saved-launch projection", () => {
+    const launch = launchSchema.parse({
+      id: "launch-1",
+      name: "Falcon 9 | Test",
+      net: "2026-06-01T00:00:00Z",
+      status: { id: 3, name: "Launch Successful", abbrev: "Success" },
+      image: {
+        image_url: "https://example.com/launch.jpg",
+        thumbnail_url: "https://example.com/thumb.jpg",
       },
-      options: {
-        page: 1,
-        limit: 12,
-        sort: {
-          date_utc: "desc",
-        },
+      mission: null,
+      rocket: {
+        id: 1,
+        configuration: { id: 164, name: "Falcon 9" },
       },
+      pad: null,
+    });
+
+    expect(toFavoriteLaunch(launch)).toEqual({
+      id: "launch-1",
+      name: "Falcon 9 | Test",
+      net: "2026-06-01T00:00:00Z",
+      status: launch.status,
+      imageUrl: "https://example.com/thumb.jpg",
     });
   });
 });

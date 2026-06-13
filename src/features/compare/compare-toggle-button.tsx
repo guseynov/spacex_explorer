@@ -25,7 +25,7 @@ export function CompareToggleButton({
       aria-label={label}
       onClick={() => toggleCompare(launch)}
       className={clsx(
-        "inline-flex w-full items-center justify-center gap-2 border px-3.5 py-2 text-[0.86rem] font-medium transition sm:w-auto",
+        "inline-flex min-h-10 w-full items-center justify-center gap-2 border px-3 py-2 text-[0.78rem] font-semibold transition sm:w-auto",
         selected ? "button-primary" : "button-secondary",
       )}
     >

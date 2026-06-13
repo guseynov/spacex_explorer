@@ -1,87 +1,140 @@
 import { z } from "zod";
 
-const nullableUrl = z.string().url().nullable();
+const optionalText = z.string().nullable().optional();
+
+export const launchImageSchema = z
+  .object({
+    image_url: optionalText,
+    thumbnail_url: optionalText,
+  })
+  .nullable();
+
+export const launchLinkSchema = z.union([
+  z.string(),
+  z.object({
+    url: z.string(),
+  }),
+]);
+
+export const launchStatusSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  abbrev: z.string(),
+  description: z.string().optional(),
+});
+
+const countrySchema = z.object({
+  name: z.string(),
+});
+
+const agencySchema = z.object({
+  name: z.string(),
+  country: z.array(countrySchema).optional(),
+});
+
+export const launcherConfigurationSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  full_name: optionalText,
+  variant: optionalText,
+  description: optionalText,
+  maiden_flight: optionalText,
+  successful_launches: z.number().nullable().optional(),
+  total_launch_count: z.number().nullable().optional(),
+  manufacturer: agencySchema.nullable().optional(),
+  image: launchImageSchema.optional(),
+});
+
+export const launchPadSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  active: z.boolean().optional(),
+  description: optionalText,
+  map_image: optionalText,
+  total_launch_count: z.number().nullable().optional(),
+  orbital_launch_attempt_count: z.number().nullable().optional(),
+  image: launchImageSchema.optional(),
+  location: z
+    .object({
+      name: z.string(),
+      description: optionalText,
+      timezone_name: optionalText,
+      country: countrySchema.nullable().optional(),
+    })
+    .nullable(),
+  country: countrySchema.nullable().optional(),
+});
+
+const missionPatchSchema = z.object({
+  image_url: optionalText,
+});
 
 export const launchSchema = z.object({
   id: z.string(),
   name: z.string(),
-  date_utc: z.string(),
-  date_local: z.string(),
-  upcoming: z.boolean(),
-  success: z.boolean().nullable(),
-  details: z.string().nullable(),
-  flight_number: z.number(),
-  rocket: z.string(),
-  launchpad: z.string(),
-  links: z.object({
-    patch: z.object({
-      small: nullableUrl,
-      large: nullableUrl,
-    }),
-    flickr: z.object({
-      original: z.array(z.string().url()),
-      small: z.array(z.string().url()),
-    }),
-    article: nullableUrl,
-    wikipedia: nullableUrl,
-    webcast: nullableUrl,
-    presskit: nullableUrl,
+  net: z.string(),
+  status: launchStatusSchema,
+  image: launchImageSchema,
+  infographic: launchImageSchema.optional(),
+  failreason: optionalText,
+  agency_launch_attempt_count: z.number().nullable().optional(),
+  orbital_launch_attempt_count: z.number().nullable().optional(),
+  mission: z
+    .object({
+      name: z.string().optional(),
+      description: optionalText,
+      image: launchImageSchema.optional(),
+      info_urls: z.array(launchLinkSchema).optional(),
+      vid_urls: z.array(launchLinkSchema).optional(),
+    })
+    .nullable(),
+  rocket: z.object({
+    id: z.number(),
+    configuration: launcherConfigurationSchema,
   }),
+  pad: launchPadSchema.nullable(),
+  info_urls: z.array(launchLinkSchema).optional(),
+  vid_urls: z.array(launchLinkSchema).optional(),
+  mission_patches: z.array(missionPatchSchema).optional(),
+  program: z
+    .array(
+      z.object({
+        mission_patches: z.array(missionPatchSchema).optional(),
+      }),
+    )
+    .optional(),
+});
+
+export const launchesPageSchema = z.object({
+  count: z.number(),
+  next: z.string().nullable(),
+  previous: z.string().nullable(),
+  results: z.array(launchSchema),
+});
+
+export const launchTrendPageSchema = z.object({
+  count: z.number(),
+  next: z.string().nullable(),
+  previous: z.string().nullable(),
+  results: z.array(
+    z.object({
+      net: z.string(),
+      status: launchStatusSchema,
+    }),
+  ),
 });
 
 export const favoriteLaunchSchema = z.object({
   id: z.string(),
   name: z.string(),
-  date_utc: z.string(),
-  success: z.boolean().nullable(),
-  upcoming: z.boolean(),
-  patch: z.string().url().nullable(),
-  rocketId: z.string(),
-  launchpadId: z.string(),
-});
-
-export const launchesPageSchema = z.object({
-  docs: z.array(launchSchema),
-  totalDocs: z.number(),
-  limit: z.number(),
-  totalPages: z.number(),
-  page: z.number(),
-  hasPrevPage: z.boolean(),
-  hasNextPage: z.boolean(),
-  prevPage: z.number().nullable(),
-  nextPage: z.number().nullable(),
-});
-
-export const rocketSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  type: z.string(),
-  country: z.string(),
-  company: z.string(),
-  first_flight: z.string(),
-  description: z.string(),
-  success_rate_pct: z.number(),
-  flickr_images: z.array(z.string().url()),
-});
-
-export const launchpadSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  full_name: z.string(),
-  locality: z.string(),
-  region: z.string(),
-  details: z.string(),
-  timezone: z.string(),
-  status: z.string(),
-  launch_attempts: z.number(),
-  launch_successes: z.number(),
-  images: z.object({
-    large: z.array(z.string().url()),
-  }),
+  net: z.string(),
+  status: launchStatusSchema,
+  imageUrl: z.string().url().nullable(),
 });
 
 export type Launch = z.infer<typeof launchSchema>;
 export type LaunchesPage = z.infer<typeof launchesPageSchema>;
-export type Rocket = z.infer<typeof rocketSchema>;
-export type Launchpad = z.infer<typeof launchpadSchema>;
+export type LaunchTrendPage = z.infer<typeof launchTrendPageSchema>;
+export type LaunchStatus = z.infer<typeof launchStatusSchema>;
 export type FavoriteLaunch = z.infer<typeof favoriteLaunchSchema>;
+export type LaunchLink = z.infer<typeof launchLinkSchema>;

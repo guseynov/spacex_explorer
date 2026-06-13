@@ -6,12 +6,6 @@ test.describe("SpaceX Explorer", () => {
 
     await page.goto("/");
 
-    await expect(page.getByText("Loading launch list...")).toBeVisible({
-      timeout: 10_000,
-    });
-    await expect(page.getByText("Loading launch list...")).toBeHidden({
-      timeout: 20_000,
-    });
     await expect(
       page.getByRole("heading", { name: "Mission Future Prime", level: 2 }),
     ).toBeVisible({ timeout: 20_000 });
@@ -40,7 +34,17 @@ test.describe("SpaceX Explorer", () => {
     await expect(page.getByText(/mission notes/i)).toBeVisible();
     await expect(page.getByRole("heading", { name: /rocket/i, level: 2 })).toBeVisible();
     await expect(page.getByRole("heading", { name: /launchpad/i, level: 2 })).toBeVisible();
-    await expect(page.getByRole("heading", { name: /flickr gallery/i })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /mission gallery/i })).toBeVisible();
+  });
+
+  test("loads Launch Library trend data", async ({ page }) => {
+    await page.goto("/trends");
+
+    await expect(
+      page.getByRole("heading", { name: /launch volume and success rate/i }),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByText("2022").first()).toBeVisible();
+    await expect(page.getByText("3 launches").first()).toBeVisible();
   });
 
   test("persists favorites and exposes the compare URL", async ({ page }) => {
@@ -65,8 +69,10 @@ test.describe("SpaceX Explorer", () => {
     await compareButtons.nth(0).click();
     await compareButtons.nth(1).click();
 
-    await expect(page.getByRole("link", { name: "Compare selected" })).toBeVisible();
-    await page.getByRole("link", { name: "Compare selected" }).click();
+    await expect(
+      page.getByRole("button", { name: "Compare selected" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Compare selected" }).click();
 
     await expect(page).toHaveURL(/\/compare\?left=.*&right=.*/);
     await expect(

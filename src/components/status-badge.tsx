@@ -12,48 +12,48 @@ import {
 
 const toneClasses: Record<LaunchTone, string> = {
   [LaunchStatusTone.Upcoming]:
-    "border-[rgba(213,181,107,0.22)] bg-[rgba(213,181,107,0.08)] text-[var(--warning)]",
+    "bg-[rgba(240,187,84,0.1)] text-[var(--warning)] before:bg-[var(--warning)]",
   [LaunchStatusTone.Past]:
-    "border-[var(--border-strong)] bg-[var(--surface)] text-[var(--info)]",
+    "bg-[var(--surface-muted)] text-[var(--info)] before:bg-[var(--info)]",
   [LaunchStatusTone.Pending]:
-    "border-[rgba(163,163,173,0.22)] bg-[rgba(163,163,173,0.08)] text-[var(--muted)]",
+    "bg-[rgba(156,167,181,0.1)] text-[var(--muted)] before:bg-[var(--muted)]",
   [LaunchStatusTone.Success]:
-    "border-[rgba(143,207,157,0.22)] bg-[rgba(143,207,157,0.08)] text-[var(--success)]",
+    "bg-[rgba(85,214,154,0.1)] text-[var(--success)] before:bg-[var(--success)]",
   [LaunchStatusTone.Failure]:
-    "border-[rgba(222,143,132,0.22)] bg-[rgba(222,143,132,0.08)] text-[var(--danger)]",
+    "bg-[rgba(255,119,112,0.1)] text-[var(--danger)] before:bg-[var(--danger)]",
 };
 
 export function LaunchStatusBadges({
-  upcoming,
-  success,
+  net,
+  statusId,
 }: {
-  upcoming: boolean;
-  success: boolean | null;
+  net: string;
+  statusId: number;
 }) {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-1.5">
       <BadgePill
         label="Timing"
-        value={getLaunchTimingLabel(upcoming)}
-        tone={getLaunchTimingTone(upcoming)}
+        value={getLaunchTimingLabel(net)}
+        tone={getLaunchTimingTone(net)}
       />
       <BadgePill
         label="Outcome"
-        value={getLaunchOutcomeLabel(upcoming, success)}
-        tone={getLaunchOutcomeTone(upcoming, success)}
+        value={getLaunchOutcomeLabel(net, statusId)}
+        tone={getLaunchOutcomeTone(net, statusId)}
       />
     </div>
   );
 }
 
 export function StatusBadge({
-  upcoming,
-  success,
+  net,
+  statusId,
 }: {
-  upcoming: boolean;
-  success: boolean | null;
+  net: string;
+  statusId: number;
 }) {
-  return <LaunchStatusBadges upcoming={upcoming} success={success} />;
+  return <LaunchStatusBadges net={net} statusId={statusId} />;
 }
 
 function BadgePill({
@@ -66,16 +66,14 @@ function BadgePill({
   tone: LaunchTone;
 }) {
   return (
-    <div className="space-y-1">
-      <p className="type-mono text-[0.68rem] font-medium uppercase tracking-[0.14em] text-[var(--muted)]">
-        {label}
-      </p>
+    <div>
       <span
         className={clsx(
-          "type-mono inline-flex items-center rounded-full border px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.08em]",
+          "type-mono inline-flex items-center gap-1.5 rounded-[5px] px-2 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.06em] before:h-1.5 before:w-1.5 before:rounded-full before:content-['']",
           toneClasses[tone],
         )}
       >
+        <span className="sr-only">{label}: </span>
         {value}
       </span>
     </div>

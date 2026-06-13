@@ -1,4 +1,4 @@
-import type { FavoriteLaunch } from "./schemas";
+import type { FavoriteLaunch, Launch } from "./schemas";
 
 export const PAGE_SIZE = 12;
 
@@ -39,7 +39,6 @@ export type LaunchesQueryParams = {
 };
 
 type LaunchesQueryInput = Partial<Record<keyof LaunchesQueryParams, string>>;
-type LaunchSort = { date_utc: "asc" | "desc" } | { name: "asc" | "desc" };
 
 export const defaultLaunchFilters: LaunchesQueryParams = {
   timing: LaunchTiming.All,
@@ -49,10 +48,6 @@ export const defaultLaunchFilters: LaunchesQueryParams = {
   sort: LaunchSortOption.DateDesc,
   search: "",
 };
-
-export function escapeMissionSearch(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 function isTimingFilter(value: string | null): value is TimingFilter {
   return timingOptions.includes((value ?? "") as TimingFilter);
@@ -72,7 +67,6 @@ export function normalizeLaunchFilters(
   const requestedTiming = partial.timing ?? null;
   const requestedResult = partial.result ?? null;
   const requestedSort = partial.sort ?? null;
-
   const timing: TimingFilter = isTimingFilter(requestedTiming)
     ? requestedTiming
     : defaultLaunchFilters.timing;
@@ -80,12 +74,9 @@ export function normalizeLaunchFilters(
     ? requestedResult
     : defaultLaunchFilters.result;
 
-  const normalizedResult =
-    timing === LaunchTiming.Upcoming ? LaunchResult.All : result;
-
   return {
     timing,
-    result: normalizedResult,
+    result: timing === LaunchTiming.Upcoming ? LaunchResult.All : result,
     from: partial.from ?? "",
     to: partial.to ?? "",
     sort: isSortOption(requestedSort)
@@ -108,31 +99,24 @@ export function parseLaunchSearchParams(
   });
 }
 
-export function stringifyLaunchSearchParams(
-  filters: LaunchesQueryParams,
-) {
+export function stringifyLaunchSearchParams(filters: LaunchesQueryParams) {
   const params = new URLSearchParams();
 
   if (filters.timing !== defaultLaunchFilters.timing) {
     params.set("timing", filters.timing);
   }
-
   if (filters.result !== defaultLaunchFilters.result) {
     params.set("result", filters.result);
   }
-
   if (filters.from) {
     params.set("from", filters.from);
   }
-
   if (filters.to) {
     params.set("to", filters.to);
   }
-
   if (filters.sort !== defaultLaunchFilters.sort) {
     params.set("sort", filters.sort);
   }
-
   if (filters.search) {
     params.set("search", filters.search);
   }
@@ -140,104 +124,83 @@ export function stringifyLaunchSearchParams(
   return params;
 }
 
-export function buildLaunchesQueryPayload(
+export function buildLaunchLibraryQueryParams(
   filters: LaunchesQueryParams,
   page: number,
   limit = PAGE_SIZE,
+  now = new Date(),
 ) {
-  const query: Record<string, unknown> = {};
-  const dateUtcQuery: Record<string, string> = {};
+  const params = new URLSearchParams({
+    lsp__id: "121",
+    limit: String(limit),
+    offset: String(Math.max(page - 1, 0) * limit),
+    mode: "normal",
+    ordering: getLaunchLibraryOrdering(filters.sort),
+  });
+  const fromCandidates: Date[] = [];
+  const toCandidates: Date[] = [];
 
+  if (filters.from) {
+    fromCandidates.push(new Date(`${filters.from}T00:00:00.000Z`));
+  }
+  if (filters.to) {
+    toCandidates.push(new Date(`${filters.to}T23:59:59.999Z`));
+  }
   if (filters.timing === LaunchTiming.Upcoming) {
-    query.upcoming = true;
+    fromCandidates.push(now);
   }
-
   if (filters.timing === LaunchTiming.Past) {
-    query.upcoming = false;
+    toCandidates.push(now);
   }
 
+  if (fromCandidates.length > 0) {
+    params.set(
+      "net__gte",
+      new Date(Math.max(...fromCandidates.map((date) => date.getTime()))).toISOString(),
+    );
+  }
+  if (toCandidates.length > 0) {
+    params.set(
+      "net__lte",
+      new Date(Math.min(...toCandidates.map((date) => date.getTime()))).toISOString(),
+    );
+  }
   if (filters.result === LaunchResult.Success) {
-    query.success = true;
+    params.set("status", "3");
   }
-
   if (filters.result === LaunchResult.Failure) {
-    query.success = false;
+    params.set("status__ids", "4,7");
   }
-
-  if (filters.from || filters.to) {
-    if (filters.from) {
-      dateUtcQuery.$gte = new Date(`${filters.from}T00:00:00.000Z`).toISOString();
-    }
-
-    if (filters.to) {
-      dateUtcQuery.$lte = new Date(`${filters.to}T23:59:59.999Z`).toISOString();
-    }
-  }
-
-  if (Object.keys(dateUtcQuery).length > 0) {
-    query.date_utc = dateUtcQuery;
-  }
-
   if (filters.search) {
-    query.name = {
-      $regex: escapeMissionSearch(filters.search),
-      $options: "i",
-    };
+    params.set("search", filters.search);
   }
 
-  const sort = getLaunchSort(filters.sort);
-
-  return {
-    query,
-    options: {
-      page,
-      limit,
-      sort,
-    },
-  };
+  return params;
 }
 
-function getLaunchSort(sort: SortOption): LaunchSort {
+function getLaunchLibraryOrdering(sort: SortOption) {
   switch (sort) {
     case LaunchSortOption.DateAsc:
-      return { date_utc: "asc" };
+      return "net";
     case LaunchSortOption.NameAsc:
-      return { name: "asc" };
+      return "name";
     case LaunchSortOption.NameDesc:
-      return { name: "desc" };
+      return "-name";
     case LaunchSortOption.DateDesc:
     default:
-      return { date_utc: "desc" };
+      return "-net";
   }
 }
 
-export function isLaunchUpcoming(dateUtc: string, now = new Date()) {
-  return new Date(dateUtc).getTime() > now.getTime();
-}
-
-export function toFavoriteLaunch(launch: {
-  id: string;
-  name: string;
-  date_utc: string;
-  success: boolean | null;
-  upcoming: boolean;
-  rocket: string;
-  launchpad: string;
-  links: {
-    patch: {
-      small: string | null;
-      large: string | null;
-    };
-  };
-}): FavoriteLaunch {
+export function toFavoriteLaunch(launch: Launch): FavoriteLaunch {
   return {
     id: launch.id,
     name: launch.name,
-    date_utc: launch.date_utc,
-    success: launch.success,
-    upcoming: launch.upcoming,
-    patch: launch.links.patch.small ?? launch.links.patch.large,
-    rocketId: launch.rocket,
-    launchpadId: launch.launchpad,
+    net: launch.net,
+    status: launch.status,
+    imageUrl:
+      launch.image?.thumbnail_url ??
+      launch.image?.image_url ??
+      null,
   };
 }

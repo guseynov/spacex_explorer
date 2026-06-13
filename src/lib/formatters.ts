@@ -28,18 +28,18 @@ export function formatLaunchDateLocal(dateLocal: string) {
 }
 
 export function getLaunchStatusLabel(
-  upcoming: boolean,
-  success: boolean | null,
+  net: string,
+  statusId: number,
 ) {
-  if (upcoming) {
+  if (isLaunchUpcoming(net)) {
     return LaunchStatusLabel.Upcoming;
   }
 
-  if (success === true) {
+  if (statusId === 3) {
     return LaunchStatusLabel.Success;
   }
 
-  if (success === false) {
+  if (statusId === 4 || statusId === 7) {
     return LaunchStatusLabel.Failure;
   }
 
@@ -47,58 +47,70 @@ export function getLaunchStatusLabel(
 }
 
 export function getLaunchStatusTone(
-  upcoming: boolean,
-  success: boolean | null,
+  net: string,
+  statusId: number,
 ) {
-  if (upcoming) {
+  if (isLaunchUpcoming(net)) {
     return LaunchStatusTone.Upcoming;
   }
 
-  if (success === true) {
+  if (statusId === 3) {
     return LaunchStatusTone.Success;
   }
 
   return LaunchStatusTone.Failure;
 }
 
-export function getLaunchTimingLabel(upcoming: boolean) {
-  return upcoming ? LaunchStatusLabel.Upcoming : LaunchStatusLabel.Past;
+export function getLaunchTimingLabel(net: string) {
+  return isLaunchUpcoming(net)
+    ? LaunchStatusLabel.Upcoming
+    : LaunchStatusLabel.Past;
 }
 
 export function getLaunchOutcomeLabel(
-  upcoming: boolean,
-  success: boolean | null,
+  net: string,
+  statusId: number,
 ) {
-  if (upcoming) {
+  if (isLaunchUpcoming(net)) {
     return LaunchStatusLabel.Pending;
   }
 
-  if (success === true) {
+  if (statusId === 3) {
     return LaunchStatusLabel.Success;
   }
 
-  if (success === false) {
+  if (statusId === 4 || statusId === 7) {
     return LaunchStatusLabel.Failure;
   }
 
   return LaunchStatusLabel.Unknown;
 }
 
-export function getLaunchTimingTone(upcoming: boolean) {
-  return upcoming ? LaunchStatusTone.Upcoming : LaunchStatusTone.Past;
+export function getLaunchTimingTone(net: string) {
+  return isLaunchUpcoming(net)
+    ? LaunchStatusTone.Upcoming
+    : LaunchStatusTone.Past;
 }
 
 export function getLaunchOutcomeTone(
-  upcoming: boolean,
-  success: boolean | null,
+  net: string,
+  statusId: number,
 ) {
-  if (upcoming) {
+  if (isLaunchUpcoming(net)) {
     return LaunchStatusTone.Pending;
   }
 
-  if (success === true) {
+  if (statusId === 3) {
     return LaunchStatusTone.Success;
   }
 
-  return LaunchStatusTone.Failure;
+  if (statusId === 4 || statusId === 7) {
+    return LaunchStatusTone.Failure;
+  }
+
+  return LaunchStatusTone.Pending;
+}
+
+export function isLaunchUpcoming(net: string, now = new Date()) {
+  return new Date(net).getTime() > now.getTime();
 }

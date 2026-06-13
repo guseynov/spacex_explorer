@@ -45,7 +45,7 @@ export function LaunchesExplorer({
   });
 
   const pages = query.data?.pages ?? [];
-  const launches = pages.flatMap((page) => page.docs).map(toFavoriteLaunch);
+  const launches = pages.flatMap((page) => page.results).map(toFavoriteLaunch);
   const retryInitialLoad = () => query.refetch();
   const loadNextPage = () => query.fetchNextPage();
   const activeFilterCount = countActiveFilters(filters);
@@ -66,10 +66,10 @@ export function LaunchesExplorer({
   }, [launches.length, query.data, query.isFetchingNextPage, query.isPending]);
 
   return (
-    <div className="flex min-h-full flex-col gap-8 xl:h-full xl:min-h-0">
-      <div className="grid gap-6 xl:h-full xl:min-h-0 xl:grid-cols-[380px_minmax(0,1fr)] xl:items-stretch">
+    <div className="flex min-h-full flex-col xl:h-full xl:min-h-0">
+      <div className="grid gap-5 xl:h-full xl:min-h-0 xl:grid-cols-[320px_minmax(0,1fr)] xl:items-stretch">
         <aside className="xl:h-full xl:min-h-0">
-          <div className="scroll-shell xl:h-full xl:min-h-0 xl:overflow-y-auto xl:pr-3">
+          <div className="scroll-shell xl:h-full xl:min-h-0 xl:overflow-y-auto xl:pr-1">
             <FilterBar
               filters={filters}
               onChange={setFilters}
@@ -80,26 +80,30 @@ export function LaunchesExplorer({
 
         <section
           aria-busy={query.isPending || query.isFetchingNextPage}
-          className="flex min-h-0 min-w-0 flex-col gap-4 xl:h-full xl:max-h-full"
+          className="flex min-h-0 min-w-0 flex-col xl:h-full xl:max-h-full"
         >
-          <div className="flex flex-col gap-3 border-b border-[var(--border)] pb-3 lg:flex-row lg:items-center lg:justify-between">
-            <div
-              aria-live="polite"
-              className="pr-4 text-[0.8rem] font-medium text-[var(--muted)]"
-            >
-              {loadingMessage}
+          <header className="mb-4 flex flex-col gap-4 border-b border-[var(--border)] pb-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="min-w-0">
+              <p className="app-kicker mb-2">Flight index</p>
+              <h1 className="type-display text-[1.75rem] font-semibold tracking-[-0.035em] text-foreground sm:text-[2rem]">
+                Launch manifest
+              </h1>
+              <div
+                aria-live="polite"
+                className="mt-1.5 text-[0.8rem] font-medium text-[var(--muted)]"
+              >
+                {loadingMessage}
+              </div>
             </div>
 
-            <label className="flex min-w-0 flex-col gap-1.5 text-sm text-[var(--muted)] sm:min-w-[13.5rem]">
-              <span className="text-[0.74rem] font-medium uppercase tracking-[0.12em]">
-                Sort list
-              </span>
+            <label className="flex min-w-0 flex-col gap-1.5 text-sm text-[var(--muted)] sm:min-w-[12rem]">
+              <span className="text-[0.72rem] font-medium">Order by</span>
               <select
                 value={filters.sort}
                 onChange={(event) =>
                   setFilters({ sort: event.target.value as SortOption })
                 }
-                className="control-input control-select w-full px-4 py-2.5 text-sm"
+                className="control-input control-select min-h-10 w-full px-3 text-[0.82rem]"
               >
                 {Object.entries(sortLabels).map(([value, label]) => (
                   <option key={value} value={value}>
@@ -108,7 +112,7 @@ export function LaunchesExplorer({
                 ))}
               </select>
             </label>
-          </div>
+          </header>
           {query.isError ? (
             <RetryState
               message="The launch feed could not be loaded. Check your connection and retry."
@@ -131,15 +135,15 @@ export function LaunchesExplorer({
   );
 }
 
-function getNextPageParam(lastPage: {
-  hasNextPage: boolean;
-  nextPage: number | null;
-}) {
-  if (!lastPage.hasNextPage) {
+function getNextPageParam(
+  lastPage: { next: string | null },
+  allPages: Array<{ next: string | null }>,
+) {
+  if (!lastPage.next) {
     return undefined;
   }
 
-  return lastPage.nextPage ?? undefined;
+  return allPages.length + 1;
 }
 
 function ExplorerContent({
@@ -197,7 +201,7 @@ function ExplorerContent({
         <MobileLaunchList
           launches={launches}
           actionRenderer={(launch) => (
-            <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
+            <div className="flex w-full gap-2 sm:w-auto">
               <FavoriteToggleButton launch={launch} />
               <CompareToggleButton launch={launch} />
             </div>
@@ -211,7 +215,7 @@ function ExplorerContent({
         <VirtualizedLaunchList
           launches={launches}
           actionRenderer={(launch) => (
-            <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
+            <div className="flex w-full gap-2 sm:w-auto">
               <FavoriteToggleButton launch={launch} />
               <CompareToggleButton launch={launch} />
             </div>
@@ -323,13 +327,13 @@ function ResultsToolbar({
 
   return (
     <div className="flex flex-col gap-4 px-0 py-0">
-      <div className="flex flex-col gap-3 pt-4 pb-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-h-8 flex-col gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
           {activeFilters.length > 0 ? (
             activeFilters.map((label) => (
               <span
                 key={label}
-                className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[0.82rem] font-medium text-[var(--info)]"
+                className="inline-flex items-center rounded-[6px] bg-[var(--surface-muted)] px-2.5 py-1 text-[0.72rem] font-medium text-[var(--info)]"
               >
                 {label}
               </span>
@@ -341,7 +345,7 @@ function ResultsToolbar({
           <button
             type="button"
             onClick={onReset}
-            className="button-secondary mt-2 self-start px-4 py-2 text-sm font-semibold transition sm:mt-1 sm:self-auto"
+            className="self-start rounded-[6px] px-2 py-1 text-[0.72rem] font-semibold text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-foreground sm:self-auto"
           >
             Reset all filters
           </button>

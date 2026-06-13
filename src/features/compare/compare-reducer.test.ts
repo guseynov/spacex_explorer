@@ -12,34 +12,25 @@ import {
 const firstLaunch: FavoriteLaunch = {
   id: "launch-1",
   name: "Crew Demo-2",
-  date_utc: "2020-05-30T19:22:00.000Z",
-  success: true,
-  upcoming: false,
-  patch: "https://images2.imgbox.com/test-1.png",
-  rocketId: "rocket-1",
-  launchpadId: "launchpad-1",
+  net: "2020-05-30T19:22:00.000Z",
+  status: { id: 3, name: "Launch Successful", abbrev: "Success" },
+  imageUrl: "https://images2.imgbox.com/test-1.png",
 };
 
 const secondLaunch: FavoriteLaunch = {
   id: "launch-2",
   name: "Transporter-9",
-  date_utc: "2023-11-01T00:00:00.000Z",
-  success: false,
-  upcoming: false,
-  patch: "https://images2.imgbox.com/test-2.png",
-  rocketId: "rocket-2",
-  launchpadId: "launchpad-2",
+  net: "2023-11-01T00:00:00.000Z",
+  status: { id: 4, name: "Launch Failure", abbrev: "Failure" },
+  imageUrl: "https://images2.imgbox.com/test-2.png",
 };
 
 const thirdLaunch: FavoriteLaunch = {
   id: "launch-3",
   name: "Starlink-6",
-  date_utc: "2024-01-01T00:00:00.000Z",
-  success: true,
-  upcoming: false,
-  patch: "https://images2.imgbox.com/test-3.png",
-  rocketId: "rocket-3",
-  launchpadId: "launchpad-3",
+  net: "2024-01-01T00:00:00.000Z",
+  status: { id: 3, name: "Launch Successful", abbrev: "Success" },
+  imageUrl: "https://images2.imgbox.com/test-3.png",
 };
 
 describe("compare reducer", () => {

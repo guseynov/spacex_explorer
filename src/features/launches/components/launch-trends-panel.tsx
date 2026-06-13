@@ -72,7 +72,7 @@ export function LaunchTrendsPanel() {
             Launch volume and success rate
           </h1>
           <p className="max-w-3xl text-sm leading-6 text-[var(--muted)]">
-            Launches counted directly from the SpaceX API, covering 2006 through 2022.
+            SpaceX launches counted through Launch Library 2, covering 2006 through 2022.
           </p>
         </div>
       </header>

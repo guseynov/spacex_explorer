@@ -11,7 +11,7 @@ import {
 import type { FavoriteLaunch } from "@/lib/api/schemas";
 import { LaunchCard } from "./launch-card";
 
-const DEFAULT_ROW_HEIGHT = 196;
+const DEFAULT_ROW_HEIGHT = 142;
 const DEFAULT_LIST_HEIGHT = 720;
 const LOAD_MORE_THRESHOLD = 240;
 
@@ -147,7 +147,7 @@ export function VirtualizedLaunchList({
       overscanCount={3}
       defaultHeight={DEFAULT_LIST_HEIGHT}
       className={clsx(
-        "launch-list-shell scroll-fade-shell scroll-shell min-h-0 flex-1 rounded-[1.25rem]",
+        "launch-list-shell scroll-fade-shell scroll-shell min-h-0 flex-1 rounded-[0.875rem]",
         showTopFade && "fade-top-active",
         showBottomFade && "fade-bottom-active",
       )}

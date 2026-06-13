@@ -2,7 +2,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/empty-state";
 import { SectionHeading } from "@/components/section-heading";
 import { LaunchStatusBadges } from "@/components/status-badge";
-import { fetchLaunchById, fetchLaunchpadById, fetchRocketById } from "@/lib/api/client";
+import { fetchLaunchById } from "@/lib/api/client";
 import { formatLaunchDate, formatLaunchDateLocal } from "@/lib/formatters";
 
 type CompareId = string | null;
@@ -60,18 +60,7 @@ export async function ComparePage({
 }
 
 async function loadComparisonColumn(launchId: string) {
-  const launch = await fetchLaunchById(launchId);
-  const [rocketResult, launchpadResult] = await Promise.allSettled([
-    fetchRocketById(launch.rocket),
-    fetchLaunchpadById(launch.launchpad),
-  ]);
-
-  return {
-    launch,
-    rocket: rocketResult.status === "fulfilled" ? rocketResult.value : null,
-    launchpad:
-      launchpadResult.status === "fulfilled" ? launchpadResult.value : null,
-  };
+  return fetchLaunchById(launchId);
 }
 
 function CompareColumn({
@@ -79,16 +68,22 @@ function CompareColumn({
 }: {
   data: Awaited<ReturnType<typeof loadComparisonColumn>>;
 }) {
-  const { launch, rocket, launchpad } = data;
+  const launch = data;
+  const rocket = launch.rocket.configuration;
+  const launchpad = launch.pad;
+  const flightNumber =
+    launch.agency_launch_attempt_count ?? launch.orbital_launch_attempt_count;
 
   return (
     <section className="panel px-6 py-6">
       <div className="space-y-4">
         <div className="flex flex-wrap items-center gap-3">
-          <LaunchStatusBadges upcoming={launch.upcoming} success={launch.success} />
-          <span className="text-[0.82rem] font-medium text-[var(--muted)]">
-            Flight {launch.flight_number}
-          </span>
+          <LaunchStatusBadges net={launch.net} statusId={launch.status.id} />
+          {flightNumber ? (
+            <span className="text-[0.82rem] font-medium text-[var(--muted)]">
+              SpaceX launch {flightNumber}
+            </span>
+          ) : null}
         </div>
 
         <div className="space-y-3">
@@ -96,30 +91,36 @@ function CompareColumn({
             {launch.name}
           </h2>
           <p className="text-sm leading-6 text-[var(--muted)]">
-            {launch.details ?? "No mission summary is available for this launch."}
+            {launch.mission?.description ||
+              launch.failreason ||
+              "No mission summary is available for this launch."}
           </p>
         </div>
 
         <dl className="grid gap-4 sm:grid-cols-2">
-          <Metric label="UTC" value={formatLaunchDate(launch.date_utc)} />
-          <Metric label="Local" value={formatLaunchDateLocal(launch.date_local)} />
-          <Metric label="Rocket" value={rocket?.name ?? "Unavailable"} />
+          <Metric label="UTC" value={formatLaunchDate(launch.net)} />
+          <Metric label="Local" value={formatLaunchDateLocal(launch.net)} />
+          <Metric label="Rocket" value={rocket.full_name || rocket.name} />
           <Metric
             label="Launchpad"
-            value={launchpad?.full_name ?? "Unavailable"}
+            value={launchpad?.name ?? "Unavailable"}
           />
         </dl>
 
         <div className="grid gap-3">
           <DetailLine
             label="Rocket details"
-            value={rocket ? `${rocket.company} · ${rocket.country}` : "Unavailable"}
+            value={`${rocket.manufacturer?.name ?? "SpaceX"}${
+              rocket.variant ? ` · ${rocket.variant}` : ""
+            }`}
           />
           <DetailLine
             label="Launchpad details"
             value={
               launchpad
-                ? `${launchpad.locality}, ${launchpad.region}`
+                ? launchpad.location?.name ??
+                  launchpad.country?.name ??
+                  "Location unavailable"
                 : "Unavailable"
             }
           />

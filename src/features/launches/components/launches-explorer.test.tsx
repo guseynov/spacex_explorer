@@ -79,7 +79,7 @@ describe("LaunchesExplorer", () => {
     mockUseInfiniteQuery.mockReturnValue(
       buildQueryResult({
         data: {
-          pages: [{ docs: [] }],
+          pages: [{ results: [] }],
         },
       }) as never,
     );
@@ -130,7 +130,7 @@ describe("LaunchesExplorer", () => {
     mockUseInfiniteQuery.mockReturnValue(
       buildQueryResult({
         data: {
-          pages: [{ docs: [] }],
+          pages: [{ results: [] }],
         },
       }) as never,
     );
@@ -155,21 +155,17 @@ describe("LaunchesExplorer", () => {
         data: {
           pages: [
             {
-              docs: [
+              results: [
                 {
                   id: "1",
                   name: "Transporter-9",
-                  date_utc: "2020-01-01T00:00:00.000Z",
-                  success: true,
-                  upcoming: false,
-                  rocket: "rocket-1",
-                  launchpad: "launchpad-1",
-                  links: {
-                    patch: {
-                      small: null,
-                      large: null,
-                    },
+                  net: "2020-01-01T00:00:00.000Z",
+                  status: {
+                    id: 3,
+                    name: "Launch Successful",
+                    abbrev: "Success",
                   },
+                  image: null,
                 },
               ],
             },

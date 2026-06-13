@@ -1,5 +1,6 @@
 "use client";
 
+import { CalendarRange, RotateCcw, Search, SlidersHorizontal } from "lucide-react";
 import {
   defaultLaunchFilters,
   LaunchResult,
@@ -18,144 +19,146 @@ export function FilterBar({
   onChange: (next: Partial<LaunchesQueryParams>) => void;
   onClear: () => void;
 }) {
-  const mobileSummary = getMobileFilterSummary(filters);
-  const hasMobileSummary = mobileSummary.length > 0;
   const hasAnyFilters = hasActiveFilters(filters);
 
   return (
     <>
-      <form
-        className="flex flex-col gap-3 xl:hidden"
-        onSubmit={(event) => event.preventDefault()}
-      >
-        <section className="control-shell px-4 py-4">
-          <div className="mb-4 flex items-start justify-between gap-4">
-            <div className="flex flex-col gap-1">
-              <p className="text-[0.92rem] font-semibold tracking-[-0.01em] text-[var(--info)]">
-                Find launches
+      <details className="control-shell group overflow-hidden xl:hidden">
+        <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-4 px-4 [&::-webkit-details-marker]:hidden">
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+              <SlidersHorizontal className="h-4 w-4" />
+            </span>
+            <div>
+              <h2 className="text-[0.9rem] font-semibold text-foreground">Filter launches</h2>
+              <p className="mt-0.5 text-[0.72rem] text-[var(--muted)]">
+                {hasAnyFilters ? "Filters are active" : "Search, timing, outcome, dates"}
               </p>
             </div>
-            {hasAnyFilters ? (
-              <button
-                type="button"
-                onClick={onClear}
-                className="button-secondary shrink-0 px-3 py-2 text-sm font-semibold transition"
-              >
-                Reset
-              </button>
-            ) : null}
           </div>
-          <div className="flex flex-col gap-6">
-            <SearchField filters={filters} onChange={onChange} />
-            <div className="flex flex-col gap-3.5">
-              <span className="text-[0.78rem] font-medium text-[var(--muted)]">
-                Timing
-              </span>
-              <TimingChips filters={filters} onChange={onChange} />
-            </div>
-          </div>
-        </section>
-
-        <details className="control-shell group overflow-hidden">
-          <summary className="flex cursor-pointer list-none flex-col gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
-            <div className="flex items-center justify-between gap-4">
-              <p className="text-[0.92rem] font-semibold tracking-[-0.01em] text-[var(--info)]">
-                More filters
-              </p>
-              <div className="text-sm font-medium text-[var(--muted)]">
-                <span className="group-open:hidden">Open</span>
-                <span className="hidden group-open:inline">Close</span>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {hasMobileSummary ? (
-                mobileSummary.map((item) => (
-                  <span
-                    key={item}
-                    className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--background-strong)] px-3 py-1.5 text-[0.82rem] font-medium text-[var(--info)]"
-                  >
-                    {item}
-                  </span>
-                ))
-              ) : (
-                <span className="text-[0.82rem] text-[var(--muted)]">No extra filters applied yet.</span>
-              )}
-            </div>
-          </summary>
-          <div className="flex flex-col gap-5 border-t border-[var(--border)] px-4 py-4">
-            <p className="text-[0.88rem] font-semibold tracking-[-0.01em] text-foreground">
-              Result and date
-            </p>
-            <FilterFields
-              filters={filters}
-              onChange={onChange}
-              fieldNames={["result", "from", "to"]}
-            />
-            {hasMobileSummary ? (
-              <button
-                type="button"
-                onClick={onClear}
-                className="button-secondary min-h-11 w-full px-4 py-3 text-sm font-semibold transition"
-              >
-                Clear extra filters
-              </button>
-            ) : null}
-          </div>
-        </details>
-      </form>
-
-      <details
-        className="control-shell group hidden overflow-hidden xl:block xl:w-fit xl:max-w-full xl:transition-[width] xl:duration-200 xl:ease-out xl:open:w-full"
-        open
-      >
-        <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-5 py-5 sm:px-6 [&::-webkit-details-marker]:hidden">
-          <p className="text-[0.92rem] font-semibold tracking-[-0.01em] text-[var(--info)]">
-            Launch filters
-          </p>
-          <div className="shrink-0 text-sm font-medium text-[var(--muted)]">
-            <span className="group-open:hidden">Show</span>
-            <span className="hidden group-open:inline">Hide</span>
-          </div>
+          <span className="text-[0.76rem] font-semibold text-[var(--muted)] group-open:hidden">
+            Open
+          </span>
+          <span className="hidden text-[0.76rem] font-semibold text-[var(--accent-strong)] group-open:inline">
+            Close
+          </span>
         </summary>
-
-        <form
-          className="flex flex-col gap-6 border-t border-[var(--border)] px-5 py-5 sm:px-6"
-          onSubmit={(event) => event.preventDefault()}
-        >
-          <section className="flex flex-col gap-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <h2 className="text-[0.95rem] font-semibold tracking-[-0.01em] text-foreground">
-                Find a launch
-              </h2>
-              <button
-                type="button"
-                onClick={onClear}
-                className="button-secondary px-4 py-2 text-sm font-semibold transition"
-              >
-                Reset
-              </button>
-            </div>
-            <SearchField filters={filters} onChange={onChange} />
-            <div className="flex flex-col gap-3.5">
-              <span className="text-[0.78rem] font-medium text-[var(--muted)]">
-                Timing
-              </span>
-              <TimingChips filters={filters} onChange={onChange} />
-            </div>
-          </section>
-
-          <section className="flex flex-col gap-4 border-t border-[var(--border)] pt-5">
-            <h2 className="text-[0.95rem] font-semibold tracking-[-0.01em] text-foreground">
-              Refine the set
-            </h2>
-            <FilterFields
-              filters={filters}
-              onChange={onChange}
-              fieldNames={["result", "from", "to"]}
-            />
-          </section>
+        <form onSubmit={(event) => event.preventDefault()}>
+          <FilterControls
+            filters={filters}
+            onChange={onChange}
+            onClear={onClear}
+            hasAnyFilters={hasAnyFilters}
+            showHeader={false}
+          />
         </form>
       </details>
+
+      <form
+        className="control-shell hidden overflow-hidden xl:block"
+        onSubmit={(event) => event.preventDefault()}
+      >
+        <FilterControls
+          filters={filters}
+          onChange={onChange}
+          onClear={onClear}
+          hasAnyFilters={hasAnyFilters}
+          showHeader
+        />
+      </form>
+    </>
+  );
+}
+
+function FilterControls({
+  filters,
+  onChange,
+  onClear,
+  hasAnyFilters,
+  showHeader,
+}: {
+  filters: LaunchesQueryParams;
+  onChange: (next: Partial<LaunchesQueryParams>) => void;
+  onClear: () => void;
+  hasAnyFilters: boolean;
+  showHeader: boolean;
+}) {
+  return (
+    <>
+      {showHeader ? (
+      <div className="flex items-start justify-between gap-4 border-b border-[var(--border)] px-4 py-4 sm:px-5">
+        <div className="flex gap-3">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[var(--accent-soft)] text-[var(--accent-strong)]">
+            <SlidersHorizontal className="h-4 w-4" />
+          </span>
+          <div>
+            <h2 className="text-[0.9rem] font-semibold text-foreground">Query console</h2>
+            <p className="mt-0.5 text-[0.75rem] text-[var(--muted)]">
+              Narrow the launch manifest
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onClear}
+          disabled={!hasAnyFilters}
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[0.76rem] font-semibold text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-35"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Reset
+        </button>
+      </div>
+      ) : hasAnyFilters ? (
+        <div className="flex justify-end border-t border-[var(--border)] px-4 py-2">
+          <button
+            type="button"
+            onClick={onClear}
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-[8px] px-2.5 text-[0.76rem] font-semibold text-[var(--muted)] transition-colors hover:bg-[var(--surface-strong)] hover:text-foreground"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Reset filters
+          </button>
+        </div>
+      ) : null}
+
+      <div className="space-y-5 px-4 py-5 sm:px-5">
+        <SearchField filters={filters} onChange={onChange} />
+
+        <fieldset className="space-y-2.5">
+          <legend className="mb-2.5 text-[0.75rem] font-medium text-[var(--muted)]">
+            Mission timing
+          </legend>
+          <TimingChips filters={filters} onChange={onChange} />
+        </fieldset>
+      </div>
+
+      <div className="space-y-5 border-t border-[var(--border)] bg-[rgba(255,255,255,0.012)] px-4 py-5 sm:px-5">
+        <fieldset className="space-y-2.5">
+          <legend className="mb-2.5 text-[0.75rem] font-medium text-[var(--muted)]">
+            Mission outcome
+          </legend>
+          <ResultChips filters={filters} onChange={onChange} />
+        </fieldset>
+
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-[0.75rem] font-medium text-[var(--muted)]">
+            <CalendarRange className="h-3.5 w-3.5" />
+            Launch window
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+            <DateField
+              label="From"
+              value={filters.from}
+              onChange={(from) => onChange({ from })}
+            />
+            <DateField
+              label="To"
+              value={filters.to}
+              onChange={(to) => onChange({ to })}
+            />
+          </div>
+        </div>
+      </div>
     </>
   );
 }
@@ -168,18 +171,19 @@ function SearchField({
   onChange: (next: Partial<LaunchesQueryParams>) => void;
 }) {
   return (
-    <label className="flex flex-col gap-4">
-      <span className="text-[0.78rem] font-medium text-[var(--muted)]">
-        Mission search
+    <label className="block space-y-2.5">
+      <span className="text-[0.75rem] font-medium text-[var(--muted)]">Mission search</span>
+      <span className="relative block">
+        <Search className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-[var(--muted)]" />
+        <input
+          type="search"
+          name="search"
+          value={filters.search}
+          onChange={(event) => onChange({ search: event.target.value })}
+          placeholder="Search mission name"
+          className="control-input min-h-11 w-full pr-4 pl-10 text-sm"
+        />
       </span>
-      <input
-        type="search"
-        name="search"
-        value={filters.search}
-        onChange={(event) => onChange({ search: event.target.value })}
-        placeholder="Enter a mission name"
-        className="control-input w-full px-4 py-3 text-sm"
-      />
     </label>
   );
 }
@@ -202,10 +206,8 @@ function TimingChips({
       <FilterChip
         active={filters.timing === LaunchTiming.Upcoming}
         onClick={() =>
-          onChange({
-            timing: LaunchTiming.Upcoming,
-            result: LaunchResult.All,
-          })}
+          onChange({ timing: LaunchTiming.Upcoming, result: LaunchResult.All })
+        }
       >
         Upcoming
       </FilterChip>
@@ -219,86 +221,61 @@ function TimingChips({
   );
 }
 
-function FilterFields({
+function ResultChips({
   filters,
   onChange,
-  fieldNames = ["result", "from", "to"],
 }: {
   filters: LaunchesQueryParams;
   onChange: (next: Partial<LaunchesQueryParams>) => void;
-  fieldNames?: Array<"result" | "from" | "to">;
 }) {
-  const showField = (name: (typeof fieldNames)[number]) => fieldNames.includes(name);
+  const disabled = filters.timing === LaunchTiming.Upcoming;
 
   return (
-    <div className="grid gap-6">
-      {showField("result") ? (
-        <div className="flex flex-col gap-4">
-          <span className="text-[0.78rem] font-medium text-[var(--muted)]">
-            Result
-          </span>
-          <div className="grid grid-cols-3 gap-2">
-            <FilterChip
-              active={filters.result === LaunchResult.All}
-              disabled={filters.timing === LaunchTiming.Upcoming}
-              onClick={() => onChange({ result: LaunchResult.All })}
-            >
-              All
-            </FilterChip>
-            <FilterChip
-              active={filters.result === LaunchResult.Success}
-              disabled={filters.timing === LaunchTiming.Upcoming}
-              onClick={() => onChange({ result: LaunchResult.Success as ResultFilter })}
-            >
-              Success
-            </FilterChip>
-            <FilterChip
-              active={filters.result === LaunchResult.Failure}
-              disabled={filters.timing === LaunchTiming.Upcoming}
-              onClick={() => onChange({ result: LaunchResult.Failure as ResultFilter })}
-            >
-              Failure
-            </FilterChip>
-          </div>
-        </div>
-      ) : null}
-
-      {showField("from") || showField("to") ? (
-        <div className="flex flex-col gap-4">
-          <span className="text-[0.78rem] font-medium text-[var(--muted)]">
-            Launch window
-          </span>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-            {showField("from") ? (
-              <label className="flex flex-col gap-4">
-                <span className="text-[0.76rem] font-medium text-[var(--muted)]">
-                  From
-                </span>
-                <input
-                  type="date"
-                  value={filters.from}
-                  onChange={(event) => onChange({ from: event.target.value })}
-                  className="control-input w-full px-4 py-3 text-sm"
-                />
-              </label>
-            ) : null}
-            {showField("to") ? (
-              <label className="flex flex-col gap-4">
-                <span className="text-[0.76rem] font-medium text-[var(--muted)]">
-                  To
-                </span>
-                <input
-                  type="date"
-                  value={filters.to}
-                  onChange={(event) => onChange({ to: event.target.value })}
-                  className="control-input w-full px-4 py-3 text-sm"
-                />
-              </label>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
+    <div className="grid grid-cols-3 gap-2">
+      <FilterChip
+        active={filters.result === LaunchResult.All}
+        disabled={disabled}
+        onClick={() => onChange({ result: LaunchResult.All })}
+      >
+        All
+      </FilterChip>
+      <FilterChip
+        active={filters.result === LaunchResult.Success}
+        disabled={disabled}
+        onClick={() => onChange({ result: LaunchResult.Success as ResultFilter })}
+      >
+        Success
+      </FilterChip>
+      <FilterChip
+        active={filters.result === LaunchResult.Failure}
+        disabled={disabled}
+        onClick={() => onChange({ result: LaunchResult.Failure as ResultFilter })}
+      >
+        Failure
+      </FilterChip>
     </div>
+  );
+}
+
+function DateField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block space-y-2">
+      <span className="text-[0.7rem] font-medium text-[var(--muted)]">{label}</span>
+      <input
+        type="date"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="control-input min-h-11 w-full px-3 text-[0.82rem]"
+      />
+    </label>
   );
 }
 
@@ -336,22 +313,6 @@ function hasActiveFilters(filters: LaunchesQueryParams) {
     filters.to !== defaultLaunchFilters.to ||
     filters.sort !== defaultLaunchFilters.sort
   );
-}
-
-function getMobileFilterSummary(filters: LaunchesQueryParams) {
-  const items: string[] = [];
-
-  if (filters.result === LaunchResult.Success) {
-    items.push("Success");
-  } else if (filters.result === LaunchResult.Failure) {
-    items.push("Failure");
-  }
-
-  if (filters.from || filters.to) {
-    items.push("Date range");
-  }
-
-  return items;
 }
 
 export const sortLabels = {

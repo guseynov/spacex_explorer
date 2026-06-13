@@ -18,10 +18,10 @@ export function CompareBanner() {
       : null;
 
   return (
-    <div className="mt-4 panel panel-strong px-5 py-4">
+    <div className="mt-4 rounded-[10px] border border-[rgba(255,90,54,0.24)] bg-[var(--accent-soft)] px-4 py-3">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
-          <p className="type-mono text-[0.78rem] font-medium uppercase tracking-[0.12em] text-[var(--muted)]">
+          <p className="type-mono text-[0.72rem] font-semibold text-[var(--accent-strong)]">
             Compare mode
           </p>
           <p className="text-sm leading-6 text-[var(--muted)]">
@@ -33,7 +33,7 @@ export function CompareBanner() {
             {items.map((item) => (
               <span
                 key={item.id}
-                className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[0.82rem] font-medium text-[var(--info)]"
+                className="inline-flex items-center rounded-[6px] bg-[var(--surface)] px-2.5 py-1 text-[0.76rem] font-medium text-[var(--info)]"
               >
                 {item.name}
               </span>
