@@ -1,29 +1,10 @@
 // @vitest-environment jsdom
 
 import { screen } from "@testing-library/react";
-import { useQuery } from "@tanstack/react-query";
 import { renderWithProviders } from "@/test/render";
 import { LaunchTrendsPanel } from "./launch-trends-panel";
 
-vi.mock("@tanstack/react-query", async () => {
-  const actual =
-    await vi.importActual<typeof import("@tanstack/react-query")>(
-      "@tanstack/react-query",
-    );
-
-  return {
-    ...actual,
-    useQuery: vi.fn(),
-  };
-});
-
-const mockUseQuery = vi.mocked(useQuery);
-
 describe("LaunchTrendsPanel", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("renders yearly launch trends from query data", () => {
     const data = Array.from({ length: 17 }, (_, index) => {
       const year = 2006 + index;
@@ -35,14 +16,7 @@ describe("LaunchTrendsPanel", () => {
       };
     });
 
-    mockUseQuery.mockReturnValue({
-      data,
-      isPending: false,
-      isError: false,
-      refetch: vi.fn(),
-    } as never);
-
-    renderWithProviders(<LaunchTrendsPanel />);
+    renderWithProviders(<LaunchTrendsPanel data={data} />);
 
     expect(
       screen.getByRole("heading", { name: /launch volume and success rate/i }),

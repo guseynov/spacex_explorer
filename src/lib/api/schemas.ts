@@ -2,12 +2,23 @@ import { z } from "zod";
 
 const optionalText = z.string().nullable().optional();
 
-export const launchImageSchema = z
-  .object({
-    image_url: optionalText,
-    thumbnail_url: optionalText,
-  })
-  .nullable();
+const launchImageObjectSchema = z.object({
+  image_url: optionalText,
+  thumbnail_url: optionalText,
+});
+
+export const launchImageSchema = z.preprocess(
+  (value) => {
+    if (typeof value === "string") {
+      const imageUrl = value.trim();
+
+      return imageUrl ? { image_url: imageUrl, thumbnail_url: null } : null;
+    }
+
+    return value;
+  },
+  launchImageObjectSchema.nullable(),
+);
 
 export const launchLinkSchema = z.union([
   z.string(),

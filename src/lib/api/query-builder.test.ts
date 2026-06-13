@@ -7,7 +7,7 @@ import {
   stringifyLaunchSearchParams,
   toFavoriteLaunch,
 } from "./query-builder";
-import { launchSchema } from "./schemas";
+import { launchImageSchema, launchSchema } from "./schemas";
 
 describe("query builder", () => {
   beforeEach(() => {
@@ -65,7 +65,6 @@ describe("query builder", () => {
     );
 
     expect(Object.fromEntries(params)).toEqual({
-      lsp__id: "121",
       limit: "12",
       offset: "24",
       mode: "normal",
@@ -110,6 +109,15 @@ describe("query builder", () => {
       net: "2026-06-01T00:00:00Z",
       status: launch.status,
       imageUrl: "https://example.com/thumb.jpg",
+    });
+  });
+
+  it("normalizes string image fields in launch payloads", () => {
+    expect(
+      launchImageSchema.parse("https://example.com/infographic.jpg"),
+    ).toEqual({
+      image_url: "https://example.com/infographic.jpg",
+      thumbnail_url: null,
     });
   });
 });

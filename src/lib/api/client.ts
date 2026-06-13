@@ -100,7 +100,6 @@ async function fetchTrendLaunches(years: number[]) {
   const lastYear = Math.max(...years);
   const limit = 100;
   const baseParams = new URLSearchParams({
-    lsp__id: "121",
     limit: String(limit),
     offset: "0",
     mode: "list",

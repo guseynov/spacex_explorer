@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Route } from "next";
 import type { FavoriteLaunch } from "@/lib/api/schemas";
 import { formatLaunchDate } from "@/lib/formatters";
-import { LaunchStatusBadges } from "@/components/status-badge";
+import { LaunchStatusBadges } from "@/components/launch-status-badges";
 import { CalendarIcon } from "@/components/ui/icons";
 import { ArrowUpRight } from "lucide-react";
 

@@ -131,7 +131,6 @@ export function buildLaunchLibraryQueryParams(
   now = new Date(),
 ) {
   const params = new URLSearchParams({
-    lsp__id: "121",
     limit: String(limit),
     offset: String(Math.max(page - 1, 0) * limit),
     mode: "normal",

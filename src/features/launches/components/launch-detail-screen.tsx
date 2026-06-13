@@ -1,16 +1,18 @@
 "use client";
 
-import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { RetryState } from "@/components/retry-state";
 import { SectionHeading } from "@/components/section-heading";
-import { LaunchStatusBadges } from "@/components/status-badge";
+import { LaunchStatusBadges } from "@/components/launch-status-badges";
 import { fetchLaunchById } from "@/lib/api/client";
 import { CompareToggleButton } from "@/features/compare/compare-toggle-button";
 import type { Launch, LaunchLink } from "@/lib/api/schemas";
 import { toFavoriteLaunch } from "@/lib/api/query-builder";
 import { formatLaunchDate, formatLaunchDateLocal } from "@/lib/formatters";
 import { FavoriteToggleButton } from "@/features/favorites/favorite-toggle-button";
+import { InfoPanel } from "./info-panel";
+import { ExternalLinks } from "./external-links";
+import { MissionGallery } from "./mission-gallery";
 import { LaunchCardSkeleton } from "./launch-card-skeleton";
 
 export function LaunchDetailScreen({
@@ -109,7 +111,7 @@ export function LaunchDetailScreen({
             </p>
           </div>
 
-          {renderExternalLinks(externalLinks)}
+          <ExternalLinks externalLinks={externalLinks} />
         </section>
 
         <div className="space-y-6">
@@ -154,26 +156,9 @@ export function LaunchDetailScreen({
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">
           Mission gallery
         </h2>
-        {renderGallery(launch.name, galleryImages)}
+        <MissionGallery launchName={launch.name} images={galleryImages} />
       </section>
     </div>
-  );
-}
-
-function InfoPanel({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="panel px-6 py-6">
-      <h2 className="text-xl font-semibold tracking-[-0.02em] text-foreground">
-        {title}
-      </h2>
-      <div className="mt-4 space-y-3">{children}</div>
-    </section>
   );
 }
 
@@ -227,61 +212,4 @@ function uniqueUrls(values: Array<string | null | undefined>) {
       values.filter((value): value is string => Boolean(value)),
     ),
   ];
-}
-
-function renderExternalLinks(externalLinks: [string, string][]) {
-  if (externalLinks.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="mt-8 space-y-3">
-      <h2 className="text-xl font-semibold tracking-tight text-foreground">
-        External links
-      </h2>
-      <div className="flex flex-wrap gap-3">
-        {externalLinks.map(([label, href], index) => (
-          <a
-            key={`${label}-${href}-${index}`}
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            className="button-secondary px-4 py-2 text-sm font-semibold transition"
-          >
-            {label}
-          </a>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function renderGallery(launchName: string, images: string[]) {
-  if (images.length === 0) {
-    return (
-      <div className="panel px-6 py-8 text-[var(--muted)]">
-        No mission gallery is available for this launch.
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {images.map((image, index) => (
-        <div
-          key={image}
-          className="overflow-hidden border border-[var(--border)] bg-[var(--surface)] p-2"
-        >
-          <Image
-            src={image}
-            alt={`${launchName} mission image ${index + 1}`}
-            width={720}
-            height={480}
-            className="h-72 w-full object-cover"
-            unoptimized
-          />
-        </div>
-      ))}
-    </div>
-  );
 }
