@@ -14,8 +14,8 @@ export function FavoritesContent({
 }) {
   if (!hasHydrated) {
     return (
-      <div className="panel px-6 py-10 text-[var(--muted)]">
-        Loading saved launches...
+      <div className="panel panel-strong px-6 py-10 text-[var(--muted)]">
+        Loading saved events...
       </div>
     );
   }
@@ -23,14 +23,14 @@ export function FavoritesContent({
   if (items.length === 0) {
     return (
       <EmptyState
-        title="No saved launches yet"
-        description="Save launches from the explorer or detail pages to build your shortlist."
+        title="No saved events yet"
+        description="Save events from the explorer or detail pages to build your shortlist."
         action={
           <Link
             href="/"
             className="button-primary inline-flex px-5 py-3 text-sm font-semibold transition"
           >
-            Explore launches
+            Explore events
           </Link>
         }
       />
@@ -38,7 +38,7 @@ export function FavoritesContent({
   }
 
   return (
-    <div className="panel overflow-hidden">
+    <div className="launch-list-shell overflow-hidden rounded-[0.5rem]">
       {items.map((launch, index) => (
         <div
           key={launch.id}

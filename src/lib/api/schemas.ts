@@ -44,7 +44,7 @@ const agencySchema = z.object({
 });
 
 export const launcherConfigurationSchema = z.object({
-  id: z.number(),
+  id: z.union([z.number(), z.string()]),
   name: z.string(),
   full_name: optionalText,
   variant: optionalText,
@@ -57,7 +57,7 @@ export const launcherConfigurationSchema = z.object({
 });
 
 export const launchPadSchema = z.object({
-  id: z.number(),
+  id: z.union([z.number(), z.string()]),
   name: z.string(),
   active: z.boolean().optional(),
   description: optionalText,
@@ -100,7 +100,7 @@ export const launchSchema = z.object({
     })
     .nullable(),
   rocket: z.object({
-    id: z.number(),
+    id: z.union([z.number(), z.string()]),
     configuration: launcherConfigurationSchema,
   }),
   pad: launchPadSchema.nullable(),
@@ -141,6 +141,10 @@ export const favoriteLaunchSchema = z.object({
   net: z.string(),
   status: launchStatusSchema,
   imageUrl: z.string().url().nullable(),
+  rocketName: z.string().optional(),
+  padName: z.string().optional(),
+  locationName: z.string().optional(),
+  flightNumber: z.number().nullable().optional(),
 });
 
 export type Launch = z.infer<typeof launchSchema>;

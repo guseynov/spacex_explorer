@@ -1,8 +1,8 @@
 import { LaunchSortOption } from "@/lib/api/query-builder";
 
 export const sortLabels = {
-  [LaunchSortOption.DateDesc]: "Newest first",
-  [LaunchSortOption.DateAsc]: "Oldest first",
-  [LaunchSortOption.NameAsc]: "Mission name: A-Z",
-  [LaunchSortOption.NameDesc]: "Mission name: Z-A",
+  [LaunchSortOption.DateDesc]: "Newest activity",
+  [LaunchSortOption.DateAsc]: "Oldest activity",
+  [LaunchSortOption.NameAsc]: "Event title: A-Z",
+  [LaunchSortOption.NameDesc]: "Event title: Z-A",
 } as const;

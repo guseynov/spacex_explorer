@@ -2,13 +2,20 @@
 
 export function LaunchCardSkeleton() {
   return (
-    <div className="border-b border-[var(--border)] px-4 py-4 sm:px-5">
-      <div className="flex items-start gap-4">
-        <div className="h-[72px] w-[72px] animate-pulse rounded-[10px] bg-white/8" />
-        <div className="flex-1 space-y-3 py-1">
-          <div className="h-4 w-24 animate-pulse rounded bg-white/8" />
-          <div className="h-6 w-2/3 animate-pulse rounded bg-white/8" />
-          <div className="h-4 w-40 animate-pulse rounded bg-white/8" />
+    <div className="overflow-hidden rounded-[0.375rem] border border-[var(--border)] bg-[rgba(15,21,36,0.92)]">
+      <div className="h-[138px] animate-pulse bg-white/6" />
+      <div className="space-y-3 px-4 py-4">
+        <div className="h-4 w-20 animate-pulse rounded bg-white/8" />
+        <div className="h-7 w-2/3 animate-pulse rounded bg-white/8" />
+        <div className="space-y-2">
+          <div className="h-3 w-full animate-pulse rounded bg-white/8" />
+          <div className="h-3 w-full animate-pulse rounded bg-white/8" />
+          <div className="h-3 w-full animate-pulse rounded bg-white/8" />
+        </div>
+        <div className="h-px bg-white/6" />
+        <div className="flex justify-between">
+          <div className="h-4 w-16 animate-pulse rounded bg-white/8" />
+          <div className="h-4 w-16 animate-pulse rounded bg-white/8" />
         </div>
       </div>
     </div>

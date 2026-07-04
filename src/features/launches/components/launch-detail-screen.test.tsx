@@ -20,10 +20,10 @@ vi.mock("@tanstack/react-query", async () => {
 const mockUseQuery = vi.mocked(useQuery);
 
 const launch = {
-  id: "launch-1",
-  name: "Crew Demo-2",
+  id: "EONET_1234",
+  name: "Northern California Wildfires",
   net: "2020-05-30T19:22:00.000Z",
-  status: { id: 3, name: "Launch Successful", abbrev: "Success" },
+  status: { id: 2, name: "Closed Event", abbrev: "Closed" },
   image: {
     image_url: "https://example.com/launch.jpg",
     thumbnail_url: "https://example.com/launch-thumb.jpg",
@@ -33,22 +33,22 @@ const launch = {
   agency_launch_attempt_count: 94,
   orbital_launch_attempt_count: 100,
   mission: {
-    name: "Crew Demo-2",
-    description: "A historic crewed launch.",
+    name: "Northern California Wildfires",
+    description: "A large wildfire event observed across several counties.",
     image: null,
-    info_urls: [{ url: "https://example.com/article" }],
+    info_urls: [{ url: "https://example.com/source" }],
     vid_urls: [{ url: "https://example.com/webcast" }],
   },
   rocket: {
     id: 1,
     configuration: {
       id: 164,
-      name: "Falcon 9",
-      full_name: "Falcon 9 Block 5",
-      variant: "Block 5",
-      description: "Reusable launch vehicle.",
+      name: "Wildfires",
+      full_name: "Wildfires",
+      variant: "Natural event",
+      description: "Thermal hotspot and fire perimeter observations.",
       manufacturer: {
-        name: "SpaceX",
+        name: "NASA EONET",
         country: [{ name: "United States of America" }],
       },
       image: null,
@@ -56,13 +56,13 @@ const launch = {
   },
   pad: {
     id: 80,
-    name: "KSC LC 39A",
+    name: "NASA FIRMS",
     active: true,
-    description: "Historic launch site.",
+    description: "Observed geometry derived from NASA source feeds.",
     image: null,
     location: {
-      name: "Cape Canaveral, Florida, USA",
-      description: "Kennedy Space Center.",
+      name: "California, United States",
+      description: "Approximate latest geometry summary.",
       timezone_name: "America/New_York",
       country: { name: "United States of America" },
     },
@@ -79,7 +79,7 @@ describe("LaunchDetailScreen", () => {
     vi.clearAllMocks();
   });
 
-  it("renders launch, rocket, launchpad, and gallery data", () => {
+  it("renders event, category, geometry, and gallery data", () => {
     mockUseQuery.mockReturnValue({
       data: launch,
       isPending: false,
@@ -90,16 +90,16 @@ describe("LaunchDetailScreen", () => {
     renderWithProviders(<LaunchDetailScreen launchId="launch-1" />);
 
     expect(
-      screen.getByRole("heading", { name: /crew demo-2/i }),
+      screen.getByRole("heading", { name: /northern california wildfires/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Falcon 9 Block 5/)).toBeInTheDocument();
-    expect(screen.getByText(/KSC LC 39A/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /article/i })).toHaveAttribute(
+    expect(screen.getByText(/^Wildfires$/)).toBeInTheDocument();
+    expect(screen.getByText(/NASA FIRMS/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /source/i })).toHaveAttribute(
       "href",
-      "https://example.com/article",
+      "https://example.com/source",
     );
     expect(
-      screen.getByAltText(/crew demo-2 mission image 1/i),
+      screen.getByAltText(/northern california wildfires event image 1/i),
     ).toBeInTheDocument();
   });
 
@@ -117,7 +117,7 @@ describe("LaunchDetailScreen", () => {
     renderWithProviders(<LaunchDetailScreen launchId="launch-1" />);
 
     expect(
-      screen.getByText(/no mission gallery is available for this launch/i),
+      screen.getByText(/no related imagery is available for this event/i),
     ).toBeInTheDocument();
   });
 });

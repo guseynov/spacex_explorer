@@ -21,7 +21,19 @@ export default async function HomePage(props: {
       return (
         <div className="flex min-h-full items-start justify-center pt-6">
           <RateLimitState
-            message="Launch Library is rate limiting requests right now. Refresh the page in a moment to try again."
+            title="EONET feed temporarily unavailable"
+            message="NASA EONET is rate limiting requests right now. Refresh the page in a moment to try again."
+          />
+        </div>
+      );
+    }
+
+    if (error instanceof LaunchApiError && error.status === 503) {
+      return (
+        <div className="flex min-h-full items-start justify-center pt-6">
+          <RateLimitState
+            title="EONET feed temporarily unavailable"
+            message="NASA EONET is temporarily unavailable. Refresh the page in a moment to try again."
           />
         </div>
       );

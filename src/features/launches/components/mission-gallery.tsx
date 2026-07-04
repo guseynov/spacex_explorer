@@ -10,7 +10,7 @@ export function MissionGallery({
   if (images.length === 0) {
     return (
       <div className="panel px-6 py-8 text-[var(--muted)]">
-        No mission gallery is available for this launch.
+        No related imagery is available for this event.
       </div>
     );
   }
@@ -24,7 +24,7 @@ export function MissionGallery({
         >
           <Image
             src={image}
-            alt={`${launchName} mission image ${index + 1}`}
+            alt={`${launchName} event image ${index + 1}`}
             width={720}
             height={480}
             className="h-72 w-full object-cover"

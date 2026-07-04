@@ -9,11 +9,11 @@ export const LaunchStatusTone = {
 } as const;
 
 export const LaunchStatusLabel = {
-  Upcoming: "Upcoming",
-  Past: "Past",
-  Success: "Success",
-  Failure: "Failure",
-  Pending: "Pending",
+  Upcoming: "Active",
+  Past: "Closed",
+  Success: "Closed",
+  Failure: "Active",
+  Pending: "Active",
   Unknown: "Unknown",
 } as const;
 
@@ -28,84 +28,72 @@ export function formatLaunchDateLocal(dateLocal: string) {
 }
 
 export function getLaunchStatusLabel(
-  net: string,
+  _net: string,
   statusId: number,
 ) {
-  if (isLaunchUpcoming(net)) {
+  if (statusId === 1) {
     return LaunchStatusLabel.Upcoming;
   }
 
-  if (statusId === 3) {
-    return LaunchStatusLabel.Success;
-  }
-
-  if (statusId === 4 || statusId === 7) {
-    return LaunchStatusLabel.Failure;
+  if (statusId === 2) {
+    return LaunchStatusLabel.Past;
   }
 
   return LaunchStatusLabel.Unknown;
 }
 
 export function getLaunchStatusTone(
-  net: string,
+  _net: string,
   statusId: number,
 ) {
-  if (isLaunchUpcoming(net)) {
+  if (statusId === 1) {
     return LaunchStatusTone.Upcoming;
   }
 
-  if (statusId === 3) {
-    return LaunchStatusTone.Success;
+  if (statusId === 2) {
+    return LaunchStatusTone.Past;
   }
 
-  return LaunchStatusTone.Failure;
+  return LaunchStatusTone.Pending;
 }
 
-export function getLaunchTimingLabel(net: string) {
-  return isLaunchUpcoming(net)
-    ? LaunchStatusLabel.Upcoming
-    : LaunchStatusLabel.Past;
+export function getLaunchTimingLabel(_net: string, statusId: number) {
+  return statusId === 2
+    ? LaunchStatusLabel.Past
+    : LaunchStatusLabel.Upcoming;
 }
 
 export function getLaunchOutcomeLabel(
-  net: string,
+  _net: string,
   statusId: number,
 ) {
-  if (isLaunchUpcoming(net)) {
+  if (statusId === 2) {
+    return LaunchStatusLabel.Past;
+  }
+
+  if (statusId === 1) {
     return LaunchStatusLabel.Pending;
-  }
-
-  if (statusId === 3) {
-    return LaunchStatusLabel.Success;
-  }
-
-  if (statusId === 4 || statusId === 7) {
-    return LaunchStatusLabel.Failure;
   }
 
   return LaunchStatusLabel.Unknown;
 }
 
-export function getLaunchTimingTone(net: string) {
-  return isLaunchUpcoming(net)
-    ? LaunchStatusTone.Upcoming
-    : LaunchStatusTone.Past;
+export function getLaunchTimingTone(_net: string, statusId: number) {
+  return statusId === 2
+    ? LaunchStatusTone.Past
+    : LaunchStatusTone.Upcoming;
 }
 
 export function getLaunchOutcomeTone(
-  net: string,
+  _net: string,
   statusId: number,
 ) {
-  if (isLaunchUpcoming(net)) {
+  if (statusId === 1) {
     return LaunchStatusTone.Pending;
   }
 
-  if (statusId === 3) {
-    return LaunchStatusTone.Success;
-  }
-
-  if (statusId === 4 || statusId === 7) {
-    return LaunchStatusTone.Failure;
+  if (statusId === 2) {
+    return LaunchStatusTone.Past;
   }
 
   return LaunchStatusTone.Pending;

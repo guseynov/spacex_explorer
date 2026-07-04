@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, vi } from "vitest";
 import {
-  buildLaunchLibraryQueryParams,
+  buildEonetQueryParams,
   defaultLaunchFilters,
   normalizeLaunchFilters,
   parseLaunchSearchParams,
@@ -19,78 +19,73 @@ describe("query builder", () => {
     vi.useRealTimers();
   });
 
-  it("normalizes the result filter when upcoming is selected", () => {
+  it("normalizes category filters and falls back to defaults", () => {
     expect(
       normalizeLaunchFilters({
         timing: "upcoming",
-        result: "failure",
+        category: "  wildfires  ",
+        sort: "invalid",
       }),
     ).toEqual({
       ...defaultLaunchFilters,
       timing: "upcoming",
-      result: "all",
+      category: "wildfires",
     });
   });
 
   it("parses and stringifies URL filters", () => {
     const params = new URLSearchParams(
-      "timing=past&result=success&from=2020-01-01&to=2020-12-31&sort=name_desc&search=falcon",
+      "timing=past&category=wildfires&from=2020-01-01&to=2020-12-31&sort=name_desc&search=fire",
     );
     const filters = parseLaunchSearchParams(params);
 
     expect(filters).toEqual({
       timing: "past",
-      result: "success",
+      category: "wildfires",
       from: "2020-01-01",
       to: "2020-12-31",
       sort: "name_desc",
-      search: "falcon",
+      search: "fire",
     });
     expect(stringifyLaunchSearchParams(filters).toString()).toBe(
       params.toString(),
     );
   });
 
-  it("builds Launch Library pagination and filters", () => {
-    const params = buildLaunchLibraryQueryParams(
-      {
-        timing: "past",
-        result: "failure",
-        from: "2020-01-01",
-        to: "2020-12-31",
-        sort: "name_desc",
-        search: "Starlink (v2)+",
-      },
-      3,
-    );
+  it("builds EONET query params from explicit filters", () => {
+    const params = buildEonetQueryParams({
+      timing: "past",
+      category: "wildfires",
+      from: "2020-01-01",
+      to: "2020-12-31",
+      sort: "name_desc",
+      search: "fire",
+    });
 
     expect(Object.fromEntries(params)).toEqual({
-      limit: "12",
-      offset: "24",
-      mode: "normal",
-      ordering: "-name",
-      net__gte: "2020-01-01T00:00:00.000Z",
-      net__lte: "2020-12-31T23:59:59.999Z",
-      status__ids: "4,7",
-      search: "Starlink (v2)+",
+      limit: "1000",
+      status: "closed",
+      category: "wildfires",
+      start: "2020-01-01",
+      end: "2020-12-31",
     });
   });
 
-  it("uses the current time as the upcoming lower bound", () => {
-    const params = buildLaunchLibraryQueryParams(
-      { ...defaultLaunchFilters, timing: "upcoming" },
-      1,
-    );
+  it("uses a rolling one-year window for active events without dates", () => {
+    const params = buildEonetQueryParams({
+      ...defaultLaunchFilters,
+      timing: "upcoming",
+    });
 
-    expect(params.get("net__gte")).toBe("2026-06-02T00:00:00.000Z");
+    expect(params.get("start")).toBe("2025-06-02");
   });
 
   it("creates the local saved-launch projection", () => {
     const launch = launchSchema.parse({
       id: "launch-1",
-      name: "Falcon 9 | Test",
+      name: "California Wildfire Cluster",
       net: "2026-06-01T00:00:00Z",
-      status: { id: 3, name: "Launch Successful", abbrev: "Success" },
+      status: { id: 2, name: "Closed Event", abbrev: "Closed" },
       image: {
         image_url: "https://example.com/launch.jpg",
         thumbnail_url: "https://example.com/thumb.jpg",
@@ -98,17 +93,21 @@ describe("query builder", () => {
       mission: null,
       rocket: {
         id: 1,
-        configuration: { id: 164, name: "Falcon 9" },
+        configuration: { id: 164, name: "Wildfires" },
       },
       pad: null,
     });
 
     expect(toFavoriteLaunch(launch)).toEqual({
       id: "launch-1",
-      name: "Falcon 9 | Test",
+      name: "California Wildfire Cluster",
       net: "2026-06-01T00:00:00Z",
       status: launch.status,
       imageUrl: "https://example.com/thumb.jpg",
+      rocketName: "Wildfires",
+      padName: undefined,
+      locationName: undefined,
+      flightNumber: null,
     });
   });
 

@@ -26,8 +26,8 @@ export function CompareBanner() {
           </p>
           <p className="text-sm leading-6 text-[var(--muted)]">
             {items.length === 1
-              ? "Pick one more launch to open the side-by-side comparison."
-              : "Two launches are selected and ready to compare."}
+              ? "Pick one more event to open the side-by-side comparison."
+              : "Two events are selected and ready to compare."}
           </p>
           <div className="flex flex-wrap gap-2">
             {items.map((item) => (

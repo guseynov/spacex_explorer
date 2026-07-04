@@ -1,7 +1,7 @@
 import type { FavoriteLaunch } from "@/lib/api/schemas";
 import { favoriteLaunchSchema } from "@/lib/api/schemas";
 
-export const COMPARE_STORAGE_KEY = "spacex-explorer:compare";
+export const COMPARE_STORAGE_KEY = "eonet-explorer:compare";
 export const MAX_COMPARE_ITEMS = 2;
 
 export type CompareState = {

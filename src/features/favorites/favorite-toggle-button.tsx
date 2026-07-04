@@ -17,8 +17,8 @@ export function FavoriteToggleButton({
     : "Add to favorites";
   const buttonLabel = saved ? "Saved" : "Save";
   const buttonClasses = saved
-    ? "button-primary"
-    : "button-secondary";
+    ? "text-[var(--danger)]"
+    : "text-[var(--muted)] hover:text-[var(--foreground)]";
 
   return (
     <button
@@ -27,11 +27,11 @@ export function FavoriteToggleButton({
       aria-label={ariaLabel}
       onClick={() => toggleFavorite(launch)}
       className={clsx(
-        "inline-flex min-h-10 w-full items-center justify-center gap-2 border px-3 py-2 text-[0.78rem] font-semibold transition sm:w-auto",
+        "type-mono inline-flex items-center gap-1.5 text-[0.64rem] font-medium uppercase tracking-[0.1em] transition-colors",
         buttonClasses,
       )}
     >
-      <BookmarkIcon className="h-4 w-4" />
+      <BookmarkIcon className="h-3.5 w-3.5" />
       {buttonLabel}
     </button>
   );

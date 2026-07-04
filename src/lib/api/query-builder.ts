@@ -1,6 +1,7 @@
 import type { FavoriteLaunch, Launch } from "./schemas";
 
 export const PAGE_SIZE = 12;
+export const DEFAULT_RECENT_DAYS = 90;
 
 export const LaunchTiming = {
   All: "all",
@@ -8,10 +9,8 @@ export const LaunchTiming = {
   Past: "past",
 } as const;
 
-export const LaunchResult = {
+export const EventCategory = {
   All: "all",
-  Success: "success",
-  Failure: "failure",
 } as const;
 
 export const LaunchSortOption = {
@@ -22,16 +21,31 @@ export const LaunchSortOption = {
 } as const;
 
 export const timingOptions = Object.values(LaunchTiming);
-export const resultOptions = Object.values(LaunchResult);
 export const sortOptions = Object.values(LaunchSortOption);
 
 export type TimingFilter = (typeof timingOptions)[number];
-export type ResultFilter = (typeof resultOptions)[number];
 export type SortOption = (typeof sortOptions)[number];
+
+export const eventCategoryOptions = [
+  { value: EventCategory.All, label: "All categories" },
+  { value: "wildfires", label: "Wildfires" },
+  { value: "severeStorms", label: "Severe storms" },
+  { value: "floods", label: "Floods" },
+  { value: "earthquakes", label: "Earthquakes" },
+  { value: "volcanoes", label: "Volcanoes" },
+  { value: "landslides", label: "Landslides" },
+  { value: "drought", label: "Drought" },
+  { value: "snow", label: "Snow" },
+  { value: "tempExtremes", label: "Temperature extremes" },
+  { value: "dustHaze", label: "Dust and haze" },
+  { value: "seaLakeIce", label: "Sea and lake ice" },
+  { value: "waterColor", label: "Water color" },
+  { value: "manmade", label: "Manmade" },
+] as const;
 
 export type LaunchesQueryParams = {
   timing: TimingFilter;
-  result: ResultFilter;
+  category: string;
   from: string;
   to: string;
   sort: SortOption;
@@ -42,7 +56,7 @@ type LaunchesQueryInput = Partial<Record<keyof LaunchesQueryParams, string>>;
 
 export const defaultLaunchFilters: LaunchesQueryParams = {
   timing: LaunchTiming.All,
-  result: LaunchResult.All,
+  category: EventCategory.All,
   from: "",
   to: "",
   sort: LaunchSortOption.DateDesc,
@@ -53,10 +67,6 @@ function isTimingFilter(value: string | null): value is TimingFilter {
   return timingOptions.includes((value ?? "") as TimingFilter);
 }
 
-function isResultFilter(value: string | null): value is ResultFilter {
-  return resultOptions.includes((value ?? "") as ResultFilter);
-}
-
 function isSortOption(value: string | null): value is SortOption {
   return sortOptions.includes((value ?? "") as SortOption);
 }
@@ -65,18 +75,13 @@ export function normalizeLaunchFilters(
   partial: LaunchesQueryInput,
 ): LaunchesQueryParams {
   const requestedTiming = partial.timing ?? null;
-  const requestedResult = partial.result ?? null;
   const requestedSort = partial.sort ?? null;
-  const timing: TimingFilter = isTimingFilter(requestedTiming)
-    ? requestedTiming
-    : defaultLaunchFilters.timing;
-  const result: ResultFilter = isResultFilter(requestedResult)
-    ? requestedResult
-    : defaultLaunchFilters.result;
 
   return {
-    timing,
-    result: timing === LaunchTiming.Upcoming ? LaunchResult.All : result,
+    timing: isTimingFilter(requestedTiming)
+      ? requestedTiming
+      : defaultLaunchFilters.timing,
+    category: partial.category?.trim() || defaultLaunchFilters.category,
     from: partial.from ?? "",
     to: partial.to ?? "",
     sort: isSortOption(requestedSort)
@@ -91,7 +96,7 @@ export function parseLaunchSearchParams(
 ): LaunchesQueryParams {
   return normalizeLaunchFilters({
     timing: searchParams.get("timing") ?? undefined,
-    result: searchParams.get("result") ?? undefined,
+    category: searchParams.get("category") ?? undefined,
     from: searchParams.get("from") ?? undefined,
     to: searchParams.get("to") ?? undefined,
     sort: searchParams.get("sort") ?? undefined,
@@ -105,8 +110,8 @@ export function stringifyLaunchSearchParams(filters: LaunchesQueryParams) {
   if (filters.timing !== defaultLaunchFilters.timing) {
     params.set("timing", filters.timing);
   }
-  if (filters.result !== defaultLaunchFilters.result) {
-    params.set("result", filters.result);
+  if (filters.category !== defaultLaunchFilters.category) {
+    params.set("category", filters.category);
   }
   if (filters.from) {
     params.set("from", filters.from);
@@ -132,19 +137,17 @@ export function getActiveLaunchFilterLabels(filters: LaunchesQueryParams) {
   const labels: string[] = [];
 
   if (filters.search) {
-    labels.push(`Mission: ${filters.search}`);
+    labels.push(`Search: ${filters.search}`);
   }
 
   if (filters.timing === LaunchTiming.Upcoming) {
-    labels.push("Upcoming");
+    labels.push("State: active");
   } else if (filters.timing === LaunchTiming.Past) {
-    labels.push("Past");
+    labels.push("State: closed");
   }
 
-  if (filters.result === LaunchResult.Success) {
-    labels.push("Result: success");
-  } else if (filters.result === LaunchResult.Failure) {
-    labels.push("Result: failure");
+  if (filters.category !== EventCategory.All) {
+    labels.push(`Category: ${getEventCategoryLabel(filters.category)}`);
   }
 
   if (filters.from || filters.to) {
@@ -160,71 +163,43 @@ export function getActiveLaunchFilterLabels(filters: LaunchesQueryParams) {
   return labels;
 }
 
-export function buildLaunchLibraryQueryParams(
+export function buildEonetQueryParams(
   filters: LaunchesQueryParams,
-  page: number,
-  limit = PAGE_SIZE,
   now = new Date(),
 ) {
   const params = new URLSearchParams({
-    limit: String(limit),
-    offset: String(Math.max(page - 1, 0) * limit),
-    mode: "normal",
-    ordering: getLaunchLibraryOrdering(filters.sort),
+    limit: "1000",
   });
-  const fromCandidates: Date[] = [];
-  const toCandidates: Date[] = [];
+  const hasDateRange = Boolean(filters.from || filters.to);
 
-  if (filters.from) {
-    fromCandidates.push(new Date(`${filters.from}T00:00:00.000Z`));
-  }
-  if (filters.to) {
-    toCandidates.push(new Date(`${filters.to}T23:59:59.999Z`));
-  }
   if (filters.timing === LaunchTiming.Upcoming) {
-    fromCandidates.push(now);
-  }
-  if (filters.timing === LaunchTiming.Past) {
-    toCandidates.push(now);
+    params.set("status", "open");
+  } else if (filters.timing === LaunchTiming.Past) {
+    params.set("status", "closed");
+  } else {
+    params.set("status", "all");
   }
 
-  if (fromCandidates.length > 0) {
-    params.set(
-      "net__gte",
-      new Date(Math.max(...fromCandidates.map((date) => date.getTime()))).toISOString(),
-    );
+  if (filters.category !== EventCategory.All) {
+    params.set("category", filters.category);
   }
-  if (toCandidates.length > 0) {
-    params.set(
-      "net__lte",
-      new Date(Math.min(...toCandidates.map((date) => date.getTime()))).toISOString(),
-    );
-  }
-  if (filters.result === LaunchResult.Success) {
-    params.set("status", "3");
-  }
-  if (filters.result === LaunchResult.Failure) {
-    params.set("status__ids", "4,7");
-  }
-  if (filters.search) {
-    params.set("search", filters.search);
+
+  if (hasDateRange) {
+    if (filters.from) {
+      params.set("start", filters.from);
+    }
+    if (filters.to) {
+      params.set("end", filters.to);
+    }
+  } else if (filters.timing !== LaunchTiming.Upcoming) {
+    params.set("days", String(DEFAULT_RECENT_DAYS));
+  } else {
+    const oneYearAgo = new Date(now);
+    oneYearAgo.setUTCFullYear(now.getUTCFullYear() - 1);
+    params.set("start", oneYearAgo.toISOString().slice(0, 10));
   }
 
   return params;
-}
-
-function getLaunchLibraryOrdering(sort: SortOption) {
-  switch (sort) {
-    case LaunchSortOption.DateAsc:
-      return "net";
-    case LaunchSortOption.NameAsc:
-      return "name";
-    case LaunchSortOption.NameDesc:
-      return "-name";
-    case LaunchSortOption.DateDesc:
-    default:
-      return "-net";
-  }
 }
 
 function getLaunchSortLabel(sort: SortOption) {
@@ -232,13 +207,18 @@ function getLaunchSortLabel(sort: SortOption) {
     case LaunchSortOption.DateAsc:
       return "Oldest first";
     case LaunchSortOption.NameAsc:
-      return "Mission name: A-Z";
+      return "Event title: A-Z";
     case LaunchSortOption.NameDesc:
-      return "Mission name: Z-A";
+      return "Event title: Z-A";
     case LaunchSortOption.DateDesc:
     default:
       return "Newest first";
   }
+}
+
+export function getEventCategoryLabel(category: string) {
+  return eventCategoryOptions.find((option) => option.value === category)?.label
+    ?? category;
 }
 
 export function toFavoriteLaunch(launch: Launch): FavoriteLaunch {
@@ -251,5 +231,15 @@ export function toFavoriteLaunch(launch: Launch): FavoriteLaunch {
       launch.image?.thumbnail_url ??
       launch.image?.image_url ??
       null,
+    rocketName:
+      launch.rocket?.configuration?.full_name ??
+      launch.rocket?.configuration?.name ??
+      "Uncategorized",
+    padName: launch.pad?.name ?? undefined,
+    locationName:
+      launch.pad?.location?.name ??
+      launch.pad?.country?.name ??
+      undefined,
+    flightNumber: null,
   };
 }

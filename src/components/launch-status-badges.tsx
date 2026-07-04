@@ -2,22 +2,20 @@ import clsx from "clsx";
 import {
   getLaunchOutcomeLabel,
   getLaunchOutcomeTone,
-  getLaunchTimingLabel,
-  getLaunchTimingTone,
   LaunchStatusTone,
 } from "@/lib/formatters";
 
 const toneClasses = {
   [LaunchStatusTone.Upcoming]:
-    "bg-[rgba(240,187,84,0.1)] text-[var(--warning)] before:bg-[var(--warning)]",
+    "border-[rgba(251,191,36,0.24)] bg-[rgba(251,191,36,0.08)] text-[var(--warning)] before:bg-[var(--warning)]",
   [LaunchStatusTone.Past]:
-    "bg-[var(--surface-muted)] text-[var(--info)] before:bg-[var(--info)]",
+    "border-[var(--border)] bg-[rgba(255,255,255,0.03)] text-[var(--info)] before:bg-[var(--info)]",
   [LaunchStatusTone.Pending]:
-    "bg-[rgba(156,167,181,0.1)] text-[var(--muted)] before:bg-[var(--muted)]",
+    "border-[rgba(197,208,232,0.12)] bg-[rgba(197,208,232,0.05)] text-[var(--muted)] before:bg-[var(--muted)]",
   [LaunchStatusTone.Success]:
-    "bg-[rgba(85,214,154,0.1)] text-[var(--success)] before:bg-[var(--success)]",
+    "border-[rgba(74,222,128,0.24)] bg-[rgba(74,222,128,0.08)] text-[var(--success)] before:bg-[var(--success)]",
   [LaunchStatusTone.Failure]:
-    "bg-[rgba(255,119,112,0.1)] text-[var(--danger)] before:bg-[var(--danger)]",
+    "border-[rgba(248,113,113,0.24)] bg-[rgba(248,113,113,0.08)] text-[var(--danger)] before:bg-[var(--danger)]",
 } as const;
 
 export function LaunchStatusBadges({
@@ -29,9 +27,8 @@ export function LaunchStatusBadges({
 }) {
   return (
     <div className="flex flex-wrap gap-1.5">
-      {renderPill("Timing", getLaunchTimingLabel(net), getLaunchTimingTone(net))}
       {renderPill(
-        "Outcome",
+        "Status",
         getLaunchOutcomeLabel(net, statusId),
         getLaunchOutcomeTone(net, statusId),
       )}
@@ -43,7 +40,7 @@ function renderPill(label: string, value: string, tone: keyof typeof toneClasses
   return (
     <span
       className={clsx(
-        "type-mono inline-flex items-center gap-1.5 rounded-[5px] px-2 py-1 text-[0.64rem] font-semibold uppercase tracking-[0.06em] before:h-1.5 before:w-1.5 before:rounded-full before:content-['']",
+        "type-mono inline-flex items-center gap-1.5 rounded-[3px] border px-2.5 py-1 text-[0.6rem] font-medium uppercase tracking-[0.08em] before:h-1.5 before:w-1.5 before:rounded-full before:content-['']",
         toneClasses[tone],
       )}
     >

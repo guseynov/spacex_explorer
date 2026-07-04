@@ -14,7 +14,7 @@ export default function Error({
           Favorites failed to load
         </p>
         <h2 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">
-          Your saved launches are temporarily unavailable.
+          Your saved events are temporarily unavailable.
         </h2>
         <p className="text-base leading-7 text-[var(--muted)]">
           {error.message || "Try loading the favorites page again."}

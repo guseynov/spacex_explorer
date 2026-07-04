@@ -11,13 +11,13 @@ export default function Error({
     <div className="panel px-6 py-12 text-center sm:px-10">
       <div className="mx-auto max-w-xl space-y-4">
         <p className="text-sm font-medium text-[var(--danger)]">
-          Launch detail failed to load
+          Event detail failed to load
         </p>
         <h2 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">
-          We could not load this mission right now.
+          We could not load this event right now.
         </h2>
         <p className="text-base leading-7 text-[var(--muted)]">
-          {error.message || "Try reloading the launch detail route."}
+          {error.message || "Try reloading the event detail route."}
         </p>
         <button
           type="button"

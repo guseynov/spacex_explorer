@@ -6,7 +6,7 @@ import { LaunchApiError } from "@/lib/api/errors";
 import type { Launch } from "@/lib/api/schemas";
 
 export const metadata: Metadata = {
-  title: "Launch Detail",
+  title: "Event Detail",
 };
 
 export default async function LaunchDetailPage(

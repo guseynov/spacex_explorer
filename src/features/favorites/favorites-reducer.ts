@@ -1,7 +1,7 @@
 import type { FavoriteLaunch } from "@/lib/api/schemas";
 import { favoriteLaunchSchema } from "@/lib/api/schemas";
 
-export const FAVORITES_STORAGE_KEY = "spacex-explorer:favorites";
+export const FAVORITES_STORAGE_KEY = "eonet-explorer:favorites";
 
 export type FavoritesState = {
   items: FavoriteLaunch[];

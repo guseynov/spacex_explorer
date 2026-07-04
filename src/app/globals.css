@@ -1,28 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --background: oklch(10.4% 0.008 250);
-  --background-strong: oklch(13.2% 0.01 250);
-  --foreground: oklch(96.8% 0.004 250);
-  --surface: oklch(15.6% 0.009 250);
-  --surface-strong: oklch(18.4% 0.011 250);
-  --surface-muted: oklch(21.8% 0.012 250);
-  --panel: oklch(14.8% 0.008 250);
-  --panel-strong: oklch(17.6% 0.01 250);
-  --border: oklch(58% 0.006 250 / 0.14);
-  --border-strong: oklch(74% 0.005 250 / 0.22);
-  --accent: oklch(91% 0.004 250);
-  --accent-strong: oklch(98% 0.002 250);
-  --accent-soft: oklch(91% 0.004 250 / 0.08);
-  --accent-ink: oklch(14% 0.004 250);
-  --muted: oklch(71% 0.006 250);
-  --success: oklch(70% 0.06 156);
-  --warning: oklch(76% 0.06 85);
-  --danger: oklch(68% 0.07 25);
-  --info: oklch(88% 0.01 250);
-  --font-display-stack: "Noto Sans Display", "Noto Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-body-stack: "Noto Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono-stack: "Noto Sans Mono", ui-monospace, "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", monospace;
+  --background: #070b14;
+  --background-strong: #050913;
+  --foreground: #e2e8f7;
+  --surface: #0d1220;
+  --surface-strong: #111827;
+  --surface-muted: #162033;
+  --panel: rgba(13, 18, 32, 0.9);
+  --panel-strong: rgba(10, 15, 28, 0.96);
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(147, 197, 253, 0.22);
+  --accent: #4490f5;
+  --accent-strong: #93c5fd;
+  --accent-soft: rgba(68, 144, 245, 0.12);
+  --accent-ink: #ffffff;
+  --muted: #5e6e96;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #c5d0e8;
+  --font-display-stack: var(--font-display), "Barlow Condensed", sans-serif;
+  --font-body-stack: var(--font-body), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono-stack: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
+  --shadow-panel:
+    0 24px 64px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 @theme inline {
@@ -45,9 +48,9 @@ body {
   min-height: 100vh;
   background-color: var(--background);
   background-image:
-    radial-gradient(circle at 82% -12%, color-mix(in oklch, var(--accent) 8%, transparent), transparent 28rem),
-    radial-gradient(circle at 12% 112%, color-mix(in oklch, var(--info) 6%, transparent), transparent 24rem),
-    linear-gradient(180deg, var(--background-strong) 0%, var(--background) 60%);
+    radial-gradient(circle at top right, rgba(68, 144, 245, 0.14), transparent 26rem),
+    radial-gradient(circle at bottom left, rgba(147, 197, 253, 0.08), transparent 24rem),
+    linear-gradient(180deg, var(--background-strong) 0%, var(--background) 62%);
   color: var(--foreground);
   font-family: var(--font-body-stack);
   font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
@@ -63,7 +66,7 @@ h3,
 .type-mono {
   font-family: var(--font-mono-stack);
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1, "ss01" 1;
+  font-feature-settings: "tnum" 1;
 }
 
 a {
@@ -78,7 +81,7 @@ select {
 }
 
 ::selection {
-  background: color-mix(in oklch, var(--accent) 24%, transparent);
+  background: rgba(68, 144, 245, 0.28);
 }
 
 :focus-visible {
@@ -87,130 +90,145 @@ select {
 }
 
 .panel {
-  background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 0.875rem;
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(180deg, rgba(17, 24, 39, 0.72) 0%, rgba(10, 15, 28, 0.96) 100%);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(18px);
 }
 
 .panel-strong {
-  background: var(--panel-strong);
+  background:
+    linear-gradient(180deg, rgba(13, 18, 32, 0.96) 0%, rgba(7, 11, 20, 1) 100%);
 }
 
 .button-primary {
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: var(--accent-ink);
-  border-radius: 0.625rem;
   cursor: pointer;
+  border: 1px solid rgba(68, 144, 245, 0.42);
+  background: rgba(68, 144, 245, 0.14);
+  color: var(--accent-strong);
+  border-radius: 0.375rem;
+  font-family: var(--font-mono-stack);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
 .button-primary:hover {
-  background: var(--accent-strong);
-  border-color: var(--accent-strong);
+  border-color: rgba(147, 197, 253, 0.46);
+  background: rgba(68, 144, 245, 0.2);
+  color: var(--accent-ink);
 }
 
 .button-secondary {
   cursor: pointer;
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--foreground);
-  border-radius: 0.625rem;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--info);
+  border-radius: 0.375rem;
   transition:
-    border-color 180ms ease,
-    background-color 180ms ease,
-    color 180ms ease;
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
 .button-secondary:hover {
   border-color: var(--border-strong);
-  background: var(--surface-strong);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--foreground);
 }
 
 .control-shell {
   border: 1px solid var(--border);
-  background: var(--panel);
-  border-radius: 0.875rem;
+  background:
+    linear-gradient(180deg, rgba(13, 18, 32, 0.92) 0%, rgba(10, 15, 28, 0.98) 100%);
+  border-radius: 0.5rem;
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(18px);
 }
 
 .control-input {
-  border: 1px solid var(--border-strong);
-  background: var(--background-strong);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--foreground);
-  border-radius: 0.625rem;
+  border-radius: 0.375rem;
   transition:
-    border-color 180ms ease,
-    background-color 180ms ease;
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
 .control-input:hover:not(:disabled) {
-  border-color: color-mix(in oklch, var(--border-strong) 82%, white 18%);
+  border-color: rgba(147, 197, 253, 0.18);
 }
 
 .control-input:focus {
-  border-color: var(--accent);
-  background: var(--surface-strong);
+  border-color: rgba(68, 144, 245, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.control-input::placeholder {
+  color: rgba(197, 208, 232, 0.45);
+}
+
+.control-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .control-select {
   appearance: none;
   padding-right: 3.25rem;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none"><path d="M4.25 6.25 8 10l3.75-3.75" stroke="%23f2f5f8" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>');
-  background-position: right 1.1rem center;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none"><path d="M4.25 6.25 8 10l3.75-3.75" stroke="%23c5d0e8" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>');
+  background-position: right 1rem center;
   background-repeat: no-repeat;
   background-size: 0.95rem;
 }
 
-.control-input::placeholder {
-  color: color-mix(in srgb, var(--muted) 78%, white 22%);
-}
-
-.control-input:disabled {
-  cursor: not-allowed;
-  background-color: color-mix(in oklch, var(--surface) 72%, black 28%);
-  color: color-mix(in oklch, var(--muted) 86%, white 14%);
-}
-
 .control-select:disabled {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none"><path d="M4.25 6.25 8 10l3.75-3.75" stroke="%2398a3af" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none"><path d="M4.25 6.25 8 10l3.75-3.75" stroke="%235e6e96" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>');
 }
 
 .filter-chip {
   min-height: 2.5rem;
-  width: 100%;
   cursor: pointer;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.03);
   color: var(--muted);
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
   padding: 0.6rem 0.75rem;
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-family: var(--font-mono-stack);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   text-align: center;
+  text-transform: uppercase;
   transition:
-    border-color 180ms ease,
-    background-color 180ms ease,
-    color 180ms ease,
-    box-shadow 180ms ease;
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
 .filter-chip:hover:not(:disabled) {
   border-color: var(--border-strong);
-  background: var(--surface-strong);
-  color: var(--foreground);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--info);
 }
 
 .filter-chip[data-active="true"]:hover:not(:disabled),
 .filter-chip-active:hover:not(:disabled) {
-  border-color: var(--border-strong);
-  background: color-mix(in oklch, var(--accent-soft) 62%, var(--surface-strong));
-  color: var(--foreground);
+  border-color: rgba(68, 144, 245, 0.45);
+  background: rgba(68, 144, 245, 0.18);
+  color: var(--accent-strong);
 }
 
 .filter-chip:active:not(:disabled),
 .filter-chip[data-active="true"]:active:not(:disabled) {
-  border-color: var(--border-strong);
-  background: color-mix(in oklch, var(--accent-soft) 78%, var(--surface-strong));
-  color: var(--foreground);
+  background: rgba(68, 144, 245, 0.24);
 }
 
 .filter-chip:disabled {
@@ -219,16 +237,9 @@ select {
 }
 
 .filter-chip-active {
-  border-color: var(--border-strong);
-  background: color-mix(in oklch, var(--accent-soft) 58%, var(--surface));
-  color: var(--foreground);
-  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--accent) 22%, transparent);
-}
-
-.filter-chip-active:active:not(:disabled) {
-  border-color: var(--border-strong);
-  background: color-mix(in oklch, var(--accent-soft) 72%, var(--surface-strong));
-  color: var(--foreground);
+  border-color: rgba(68, 144, 245, 0.42);
+  background: rgba(68, 144, 245, 0.14);
+  color: var(--accent-strong);
 }
 
 .filter-chip:focus-visible {
@@ -237,31 +248,35 @@ select {
 
 .metric-tile {
   border: 1px solid var(--border);
-  background: var(--surface-strong);
-  border-radius: 1rem;
+  border-radius: 0.375rem;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .launch-list-shell {
   border: 1px solid var(--border);
-  background: var(--panel-strong);
+  background:
+    linear-gradient(180deg, rgba(13, 18, 32, 0.96) 0%, rgba(7, 11, 20, 0.98) 100%);
+  box-shadow: var(--shadow-panel);
 }
 
 .launch-row {
   position: relative;
-  background: var(--panel-strong);
-  transition: background-color 180ms ease;
+  background: transparent;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
 }
 
 .launch-row::before {
   content: "";
   position: absolute;
-  right: 0;
+  right: 1rem;
   bottom: 0;
-  left: 0;
+  left: 1rem;
   height: 1px;
-  background: var(--accent);
+  background: rgba(68, 144, 245, 0.28);
   opacity: 0;
-  transform: scaleX(0.35);
+  transform: scaleX(0.4);
   transform-origin: left;
   transition:
     opacity 180ms ease,
@@ -269,7 +284,7 @@ select {
 }
 
 .launch-row:hover {
-  background: color-mix(in oklch, var(--surface-strong) 92%, white 8%);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .launch-row:hover::before,
@@ -286,11 +301,11 @@ select {
 }
 
 .app-kicker {
-  color: var(--accent-strong);
+  color: var(--muted);
   font-family: var(--font-mono-stack);
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -324,12 +339,21 @@ select {
   border: 0;
 }
 
+.scroll-shell {
+  scrollbar-gutter: stable;
+}
+
 .scroll-shell::-webkit-scrollbar {
   width: 10px;
 }
 
-.scroll-shell {
-  scrollbar-gutter: stable;
+.scroll-shell::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(197, 208, 232, 0.2);
+}
+
+.scroll-shell::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .scroll-fade-shell {
@@ -353,13 +377,15 @@ select {
 .scroll-fade-shell::before {
   top: 0;
   margin-bottom: -28px;
-  background: linear-gradient(180deg, rgba(6, 6, 8, 0.96) 0%, rgba(6, 6, 8, 0) 100%);
+  background:
+    linear-gradient(180deg, rgba(7, 11, 20, 0.98) 0%, rgba(7, 11, 20, 0) 100%);
 }
 
 .scroll-fade-shell::after {
   bottom: 0;
   margin-top: -28px;
-  background: linear-gradient(0deg, rgba(6, 6, 8, 0.98) 0%, rgba(6, 6, 8, 0) 100%);
+  background:
+    linear-gradient(0deg, rgba(7, 11, 20, 0.98) 0%, rgba(7, 11, 20, 0) 100%);
 }
 
 .scroll-fade-shell.fade-top-active::before {
@@ -368,15 +394,6 @@ select {
 
 .scroll-fade-shell.fade-bottom-active::after {
   opacity: 1;
-}
-
-.scroll-shell::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: color-mix(in oklch, var(--foreground) 18%, transparent);
-}
-
-.scroll-shell::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 .loading-more-indicator {

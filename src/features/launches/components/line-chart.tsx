@@ -33,7 +33,7 @@ export function LineChart({ data }: { data: YearStat[] }) {
           viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
           className="block h-auto"
           role="img"
-          aria-label="Line chart showing the yearly launch success rate"
+          aria-label="Line chart showing the yearly event closure rate"
         >
           <line
             x1={MARGIN.left}

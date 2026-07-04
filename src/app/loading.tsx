@@ -4,7 +4,7 @@ export default function Loading() {
       <div className="panel px-6 py-12">
         <div className="space-y-4">
           <p className="text-sm font-medium uppercase tracking-[0.12em] text-[var(--muted)]">
-            Launches
+            Events
           </p>
           <div className="h-8 w-56 animate-pulse rounded-full bg-white/10" />
           <div className="grid gap-3 sm:grid-cols-2">

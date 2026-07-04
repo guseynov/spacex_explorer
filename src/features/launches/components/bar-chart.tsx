@@ -18,7 +18,7 @@ export function BarChart({ data }: { data: YearStat[] }) {
           viewBox={`0 0 ${chartWidth} ${CHART_HEIGHT}`}
           className="block h-auto"
           role="img"
-          aria-label="Bar chart showing the number of launches for each year"
+          aria-label="Bar chart showing the number of events for each year"
         >
           <line
             x1={MARGIN.left}
@@ -77,7 +77,7 @@ export function BarChart({ data }: { data: YearStat[] }) {
                   fill="var(--foreground)"
                   className="text-[11px] font-semibold"
                 >
-                  {item.totalLaunches} launches
+                  {item.totalLaunches} events
                 </text>
                 <text
                   x={centerX}

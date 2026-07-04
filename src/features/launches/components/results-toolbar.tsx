@@ -20,7 +20,7 @@ export function ResultsToolbar({
             activeFilters.map((label) => (
               <span
                 key={label}
-                className="inline-flex items-center rounded-[6px] bg-[var(--surface-muted)] px-2.5 py-1 text-[0.72rem] font-medium text-[var(--info)]"
+                className="type-mono inline-flex items-center rounded-[3px] border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-2.5 py-1 text-[0.62rem] font-medium uppercase tracking-[0.08em] text-[var(--info)]"
               >
                 {label}
               </span>
@@ -32,7 +32,7 @@ export function ResultsToolbar({
           <button
             type="button"
             onClick={onReset}
-            className="self-start rounded-[6px] px-2 py-1 text-[0.72rem] font-semibold text-[var(--muted)] transition-colors hover:bg-[var(--surface)] hover:text-foreground sm:self-auto"
+            className="button-secondary type-mono self-start px-2.5 py-1.5 text-[0.62rem] font-medium uppercase tracking-[0.1em] text-[var(--muted)] sm:self-auto"
           >
             Reset all filters
           </button>

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { fireEvent, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { renderWithProviders } from "@/test/render";
@@ -28,7 +28,7 @@ const mockUseLaunchFilters = vi.mocked(useLaunchFilters);
 
 const baseFilters = {
   timing: "all" as const,
-  result: "all" as const,
+  category: "all" as const,
   from: "",
   to: "",
   sort: "date_desc" as const,
@@ -69,7 +69,7 @@ describe("LaunchesExplorer", () => {
 
     const { container } = renderWithProviders(<LaunchesExplorer />);
 
-    expect(screen.getByText("Loading launch list...")).toBeInTheDocument();
+    expect(screen.getByText("Loading event list...")).toBeInTheDocument();
     expect(container.querySelectorAll(".animate-pulse").length).toBeGreaterThan(0);
   });
 
@@ -87,7 +87,7 @@ describe("LaunchesExplorer", () => {
     renderWithProviders(<LaunchesExplorer />);
 
     expect(
-      screen.getByRole("heading", { name: /no launches match these filters/i }),
+      screen.getByRole("heading", { name: /no events match these filters/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /reset filters/i }),
@@ -117,11 +117,11 @@ describe("LaunchesExplorer", () => {
     expect(screen.getByRole("button", { name: /try again/i })).toHaveFocus();
   });
 
-  it("disables the result filter for upcoming launches", () => {
+  it("renders event state filter controls", () => {
     mockUseLaunchFilters.mockReturnValue({
       filters: {
         ...baseFilters,
-        timing: "upcoming",
+        timing: "all",
       },
       setFilters,
       resetFilters,
@@ -137,15 +137,12 @@ describe("LaunchesExplorer", () => {
 
     renderWithProviders(<LaunchesExplorer />);
 
-    expect(
-      screen.getAllByRole("button", { name: "Success" }).some((button) =>
-        button.hasAttribute("disabled"),
-      ),
-    ).toBe(true);
-    expect(screen.queryByText(/upcoming launches do not have/i)).toBeNull();
+    expect(screen.getAllByRole("button", { name: "Active" }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("button", { name: "Closed" }).length).toBeGreaterThan(0);
   });
 
-  it("loads the next page when the list is scrolled near the bottom", () => {
+  it("loads the next page when the button is pressed", async () => {
+    const user = userEvent.setup();
     const fetchNextPage = vi.fn();
 
     mockUseInfiniteQuery.mockReturnValue(
@@ -157,15 +154,21 @@ describe("LaunchesExplorer", () => {
             {
               results: [
                 {
-                  id: "1",
-                  name: "Transporter-9",
+                  id: "EONET_1",
+                  name: "Mediterranean Wildfire Complex",
                   net: "2020-01-01T00:00:00.000Z",
                   status: {
-                    id: 3,
-                    name: "Launch Successful",
-                    abbrev: "Success",
+                    id: 2,
+                    name: "Closed Event",
+                    abbrev: "Closed",
                   },
                   image: null,
+                  rocket: {
+                    configuration: {
+                      name: "Wildfires",
+                    },
+                  },
+                  pad: null,
                 },
               ],
             },
@@ -176,21 +179,9 @@ describe("LaunchesExplorer", () => {
 
     renderWithProviders(<LaunchesExplorer />);
 
-    const list = screen.getByRole("list");
-    Object.defineProperty(list, "clientHeight", {
-      configurable: true,
-      value: 400,
-    });
-    Object.defineProperty(list, "scrollHeight", {
-      configurable: true,
-      value: 1000,
-    });
-    Object.defineProperty(list, "scrollTop", {
-      configurable: true,
-      value: 500,
-    });
-
-    fireEvent.scroll(list);
+    await user.click(
+      screen.getByRole("button", { name: /load more events/i }),
+    );
 
     expect(fetchNextPage).toHaveBeenCalled();
   });

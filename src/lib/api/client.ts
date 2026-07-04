@@ -1,44 +1,30 @@
-import {
-  buildLaunchLibraryQueryParams,
-  type LaunchesQueryParams,
-} from "./query-builder";
+import { type LaunchesQueryParams, stringifyLaunchSearchParams } from "./query-builder";
 import { LaunchApiError } from "./errors";
 import {
   launchSchema,
   launchTrendPageSchema,
   launchesPageSchema,
-  type LaunchTrendPage,
 } from "./schemas";
+import {
+  fetchEonetEventById,
+  fetchEonetEventsPage,
+  fetchEonetTrendEvents,
+} from "./eonet-source";
 
-const API_BASE_URL =
-  process.env.LAUNCH_LIBRARY_API_BASE_URL ??
-  "https://ll.thespacedevs.com/2.3.0";
-const BROWSER_API_BASE_URL = "/api/launch-library";
+const BROWSER_API_BASE_URL = "/api/events";
 
 type Parser<T> = { parse: (value: unknown) => T };
 
-async function requestJson<T>(
-  path: string,
-  params: URLSearchParams,
-  parser: Parser<T>,
-) {
-  const baseUrl =
-    typeof window === "undefined" ? API_BASE_URL : BROWSER_API_BASE_URL;
-  const requestPath =
-    typeof window === "undefined" ? path : path.replace(/\/$/, "");
-  const query = params.size > 0 ? `?${params.toString()}` : "";
-  const response = await fetch(`${baseUrl}${requestPath}${query}`, {
+async function requestBrowserJson<T>(path: string, parser: Parser<T>) {
+  const response = await fetch(`${BROWSER_API_BASE_URL}${path}`, {
     headers: {
       accept: "application/json",
     },
-    ...(typeof window === "undefined"
-      ? { next: { revalidate: 300 } }
-      : {}),
   });
 
   if (!response.ok) {
     throw new LaunchApiError(
-      `Launch Library request failed with status ${response.status}.`,
+      `Launch request failed with status ${response.status}.`,
       response.status,
     );
   }
@@ -50,17 +36,26 @@ export function fetchLaunchesPage(
   filters: LaunchesQueryParams,
   page: number,
 ) {
-  return requestJson(
-    "/launches/",
-    buildLaunchLibraryQueryParams(filters, page),
+  if (typeof window === "undefined") {
+    return fetchEonetEventsPage(filters, page);
+  }
+
+  const params = stringifyLaunchSearchParams(filters);
+  params.set("page", String(page));
+
+  return requestBrowserJson(
+    `/launches?${params.toString()}`,
     launchesPageSchema,
   );
 }
 
 export function fetchLaunchById(id: string) {
-  return requestJson(
-    `/launches/${encodeURIComponent(id)}/`,
-    new URLSearchParams({ mode: "detailed" }),
+  if (typeof window === "undefined") {
+    return fetchEonetEventById(id);
+  }
+
+  return requestBrowserJson(
+    `/launches/${encodeURIComponent(id)}`,
     launchSchema,
   );
 }
@@ -72,59 +67,31 @@ type LaunchYearStats = {
 };
 
 export async function fetchLaunchYearStats(): Promise<LaunchYearStats[]> {
-  const launches = await fetchTrendLaunches();
+  const launches = await fetchEonetTrendEvents();
+  const parsed = launchTrendPageSchema.parse({
+    count: launches.length,
+    next: null,
+    previous: null,
+    results: launches,
+  });
   const statsByYear = new Map<number, LaunchYearStats>();
 
-  for (const launch of launches) {
+  for (const launch of parsed.results) {
     const year = new Date(launch.net).getUTCFullYear();
     const existing = statsByYear.get(year);
 
     if (existing) {
       existing.totalLaunches += 1;
-      existing.successLaunches += launch.status.id === 3 ? 1 : 0;
+      existing.successLaunches += launch.status.id === 2 ? 1 : 0;
       continue;
     }
 
     statsByYear.set(year, {
       year,
       totalLaunches: 1,
-      successLaunches: launch.status.id === 3 ? 1 : 0,
+      successLaunches: launch.status.id === 2 ? 1 : 0,
     });
   }
 
   return [...statsByYear.values()].sort((left, right) => left.year - right.year);
-}
-
-async function fetchTrendLaunches() {
-  const limit = 100;
-  const baseParams = new URLSearchParams({
-    limit: String(limit),
-    offset: "0",
-    mode: "list",
-    ordering: "net",
-  });
-  const firstPage = await requestJson(
-    "/launches/",
-    baseParams,
-    launchTrendPageSchema,
-  );
-  const pageCount = Math.ceil(firstPage.count / limit);
-
-  if (pageCount <= 1) {
-    return firstPage.results;
-  }
-
-  const remainingPages = await Promise.all(
-    Array.from({ length: pageCount - 1 }, (_, index) => {
-      const params = new URLSearchParams(baseParams);
-      params.set("offset", String((index + 1) * limit));
-
-      return requestJson("/launches/", params, launchTrendPageSchema);
-    }),
-  );
-
-  return [
-    ...firstPage.results,
-    ...remainingPages.flatMap((page: LaunchTrendPage) => page.results),
-  ];
 }

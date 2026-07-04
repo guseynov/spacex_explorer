@@ -11,25 +11,25 @@ import {
 
 const firstLaunch: FavoriteLaunch = {
   id: "launch-1",
-  name: "Crew Demo-2",
+  name: "Canadian Wildfire Cluster",
   net: "2020-05-30T19:22:00.000Z",
-  status: { id: 3, name: "Launch Successful", abbrev: "Success" },
+  status: { id: 2, name: "Closed Event", abbrev: "Closed" },
   imageUrl: "https://images2.imgbox.com/test-1.png",
 };
 
 const secondLaunch: FavoriteLaunch = {
   id: "launch-2",
-  name: "Transporter-9",
+  name: "Atlantic Tropical Storm Belt",
   net: "2023-11-01T00:00:00.000Z",
-  status: { id: 4, name: "Launch Failure", abbrev: "Failure" },
+  status: { id: 1, name: "Active Event", abbrev: "Active" },
   imageUrl: "https://images2.imgbox.com/test-2.png",
 };
 
 const thirdLaunch: FavoriteLaunch = {
   id: "launch-3",
-  name: "Starlink-6",
+  name: "Andes Earthquake Sequence",
   net: "2024-01-01T00:00:00.000Z",
-  status: { id: 3, name: "Launch Successful", abbrev: "Success" },
+  status: { id: 2, name: "Closed Event", abbrev: "Closed" },
   imageUrl: "https://images2.imgbox.com/test-3.png",
 };
 
@@ -38,7 +38,7 @@ describe("compare reducer", () => {
     window.localStorage.clear();
   });
 
-  it("adds, replaces, and removes launches in compare state", () => {
+  it("adds, replaces, and removes events in compare state", () => {
     const one = compareReducer(initialCompareState, {
       type: "toggle",
       payload: firstLaunch,

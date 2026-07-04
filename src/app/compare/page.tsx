@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ComparePage } from "@/features/compare/compare-page";
 
 export const metadata: Metadata = {
-  title: "Compare Launches",
+  title: "Compare Events",
 };
 
 export default async function CompareRoute(props: {

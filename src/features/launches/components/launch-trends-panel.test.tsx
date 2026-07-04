@@ -19,12 +19,12 @@ describe("LaunchTrendsPanel", () => {
     renderWithProviders(<LaunchTrendsPanel data={data} />);
 
     expect(
-      screen.getByRole("heading", { name: /launch volume and success rate/i }),
+      screen.getByRole("heading", { name: /event volume and closure rate/i }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("2006").length).toBeGreaterThan(0);
     expect(screen.getAllByText("2022").length).toBeGreaterThan(0);
     expect(screen.queryByText("2023")).not.toBeInTheDocument();
-    expect(screen.getAllByText("25 launches").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("25 events").length).toBeGreaterThan(0);
     expect(screen.getAllByText("96%").length).toBeGreaterThan(0);
   });
 });

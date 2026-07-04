@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 
 export function RateLimitState({
-  title = "Launch feed temporarily unavailable",
+  title = "Event feed temporarily unavailable",
   message,
 }: {
   title?: string;

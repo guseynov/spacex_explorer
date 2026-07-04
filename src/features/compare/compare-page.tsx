@@ -18,18 +18,18 @@ export async function ComparePage({
       <div className="space-y-8">
         <SectionHeading
           eyebrow="Compare"
-          title="Compare two launches"
-          description="Select two missions from the explorer or favorites view, then open this page to compare them side by side."
+          title="Compare two events"
+          description="Select two NASA EONET events from the explorer or favorites view, then open this page to compare them side by side."
         />
         <EmptyState
-          title="Choose two different launches"
-          description="The compare view needs two distinct launch IDs in the URL."
+          title="Choose two different events"
+          description="The compare view needs two distinct event IDs in the URL."
           action={
             <Link
               href="/"
               className="button-primary inline-flex px-5 py-3 text-sm font-semibold transition"
             >
-              Back to launches
+              Back to events
             </Link>
           }
         />
@@ -46,8 +46,8 @@ export async function ComparePage({
     <div className="space-y-8">
       <SectionHeading
         eyebrow="Compare"
-        title="Two-launch comparison"
-        description="Review mission timing, outcome, hardware, and launch site details across both launches."
+        title="Two-event comparison"
+        description="Review event timing, category, source, and latest geometry details across both selected records."
       />
 
       <div className="grid gap-6 lg:grid-cols-2">

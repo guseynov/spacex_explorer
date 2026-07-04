@@ -11,8 +11,8 @@ export function FavoritesPage() {
     <div className="space-y-8">
       <SectionHeading
         eyebrow="Bookmarks"
-        title="Favorite launches"
-        description="Your saved missions live locally in this browser, ready for quick revisits."
+        title="Favorite events"
+        description="Your saved NASA EONET events live locally in this browser, ready for quick revisits."
       />
       <FavoritesContent
         hasHydrated={hasHydrated}

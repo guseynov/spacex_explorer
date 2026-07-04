@@ -11,51 +11,45 @@ export function CompareColumn({
 }) {
   const rocket = launch.rocket.configuration;
   const launchpad = launch.pad;
-  const flightNumber =
-    launch.agency_launch_attempt_count ?? launch.orbital_launch_attempt_count;
 
   return (
-    <section className="panel px-6 py-6">
+    <section className="panel panel-strong px-6 py-6">
       <div className="space-y-4">
+        <p className="app-kicker">Event profile</p>
         <div className="flex flex-wrap items-center gap-3">
           <LaunchStatusBadges net={launch.net} statusId={launch.status.id} />
-          {flightNumber ? (
-            <span className="text-[0.82rem] font-medium text-[var(--muted)]">
-              SpaceX launch {flightNumber}
-            </span>
-          ) : null}
+          <span className="type-mono text-[0.68rem] font-medium uppercase tracking-[0.12em] text-[var(--muted)]">
+            {launch.id}
+          </span>
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-2xl font-semibold tracking-[-0.03em] text-foreground">
+          <h2 className="type-display text-[2rem] font-semibold leading-none tracking-[0.01em] text-foreground">
             {launch.name}
           </h2>
-          <p className="text-sm leading-6 text-[var(--muted)]">
+          <p className="text-sm leading-6 text-[var(--info)]/72">
             {launch.mission?.description ||
               launch.failreason ||
-              "No mission summary is available for this launch."}
+              "No event summary is available for this record."}
           </p>
         </div>
 
         <dl className="grid gap-4 sm:grid-cols-2">
-          <Metric label="UTC" value={formatLaunchDate(launch.net)} />
+          <Metric label="Observed UTC" value={formatLaunchDate(launch.net)} />
           <Metric label="Local" value={formatLaunchDateLocal(launch.net)} />
-          <Metric label="Rocket" value={rocket.full_name || rocket.name} />
-          <Metric
-            label="Launchpad"
-            value={launchpad?.name ?? "Unavailable"}
-          />
+          <Metric label="Category" value={rocket.full_name || rocket.name} />
+          <Metric label="Source" value={launchpad?.name ?? "Unavailable"} />
         </dl>
 
         <div className="grid gap-3">
           <DetailLine
-            label="Rocket details"
-            value={`${rocket.manufacturer?.name ?? "SpaceX"}${
+            label="Category details"
+            value={`${rocket.manufacturer?.name ?? "NASA EONET"}${
               rocket.variant ? ` · ${rocket.variant}` : ""
             }`}
           />
           <DetailLine
-            label="Launchpad details"
+            label="Latest geometry"
             value={
               launchpad
                 ? launchpad.location?.name ??

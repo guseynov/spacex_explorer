@@ -42,7 +42,7 @@ export function LaunchDetailScreen({
   if (launchQuery.isError) {
     return (
       <RetryState
-        message="The launch detail could not be loaded. Retry to request the mission data again."
+        message="The event detail could not be loaded. Retry to request the NASA event data again."
         onRetry={() => launchQuery.refetch()}
       />
     );
@@ -53,15 +53,13 @@ export function LaunchDetailScreen({
   const pad = launch.pad;
   const externalLinks = getExternalLinks(launch);
   const galleryImages = getGalleryImages(launch);
-  const flightNumber =
-    launch.agency_launch_attempt_count ?? launch.orbital_launch_attempt_count;
 
   return (
     <div className="space-y-8">
       <SectionHeading
-        eyebrow="Launch detail"
+        eyebrow="Event detail"
         title={launch.name}
-        description="Mission summary, supporting hardware, and launch site context for this SpaceX flight."
+        description="Category, source, timing, and latest observed geometry for this NASA EONET event."
         action={
           <div className="flex flex-col gap-3 sm:flex-row">
             <FavoriteToggleButton launch={toFavoriteLaunch(launch)} />
@@ -74,17 +72,15 @@ export function LaunchDetailScreen({
         <section className="panel px-6 py-6">
           <div className="flex flex-wrap items-center gap-3">
             <LaunchStatusBadges net={launch.net} statusId={launch.status.id} />
-            {flightNumber ? (
-              <span className="text-[0.82rem] font-medium text-[var(--muted)]">
-                SpaceX launch {flightNumber}
-              </span>
-            ) : null}
+            <span className="text-[0.82rem] font-medium text-[var(--muted)]">
+              Event ID {launch.id}
+            </span>
           </div>
 
           <dl className="mt-6 grid gap-6 sm:grid-cols-2">
             <div>
               <dt className="text-[0.78rem] font-medium text-[var(--muted)]">
-                UTC
+                Latest observed UTC
               </dt>
               <dd className="mt-2 text-lg font-medium text-foreground">
                 {formatLaunchDate(launch.net)}
@@ -102,12 +98,12 @@ export function LaunchDetailScreen({
 
           <div className="mt-8 space-y-3">
             <h2 className="text-xl font-semibold tracking-[-0.02em] text-foreground">
-              Mission notes
+              Event summary
             </h2>
             <p className="max-w-3xl text-base leading-7 text-[var(--muted)]">
               {launch.mission?.description ||
                 launch.failreason ||
-                "No mission summary is available for this launch."}
+                "No event summary is available for this record."}
             </p>
           </div>
 
@@ -115,37 +111,37 @@ export function LaunchDetailScreen({
         </section>
 
         <div className="space-y-6">
-          <InfoPanel title="Rocket">
+          <InfoPanel title="Category">
             <p className="text-lg font-medium text-foreground">
               {rocket.full_name || rocket.name}
             </p>
             <p className="text-sm text-[var(--muted)]">
-              {rocket.manufacturer?.name ?? "SpaceX"}
+              {rocket.manufacturer?.name ?? "NASA EONET"}
               {rocket.variant ? ` · ${rocket.variant}` : ""}
             </p>
             <p className="text-sm leading-6 text-[var(--muted)]">
-              {rocket.description || "No rocket description is available."}
+              {rocket.description || "No category description is available."}
             </p>
           </InfoPanel>
 
-          <InfoPanel title="Launchpad">
+          <InfoPanel title="Latest geometry">
             {pad ? (
               <>
                 <p className="text-lg font-medium text-foreground">
-                  {pad.name}
+                  {pad.location?.name ?? pad.name}
                 </p>
                 <p className="text-sm text-[var(--muted)]">
-                  {pad.location?.name ?? pad.country?.name ?? "Location unavailable"}
+                  {pad.name}
                 </p>
                 <p className="text-sm leading-6 text-[var(--muted)]">
                   {pad.description ||
                     pad.location?.description ||
-                    "No launchpad description is available."}
+                    "No geometry summary is available."}
                 </p>
               </>
             ) : (
               <p className="text-sm text-[var(--muted)]">
-                Launchpad data is unavailable for this mission.
+                Geometry data is unavailable for this event.
               </p>
             )}
           </InfoPanel>
@@ -154,7 +150,7 @@ export function LaunchDetailScreen({
 
       <section className="space-y-4">
         <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-          Mission gallery
+          Related imagery
         </h2>
         <MissionGallery launchName={launch.name} images={galleryImages} />
       </section>
@@ -185,7 +181,7 @@ function getInfoLinkLabel(url: string) {
   if (/press|kit|\.pdf/i.test(url)) {
     return "Press kit";
   }
-  return "Article";
+  return "Source";
 }
 
 function extractUrls(links: LaunchLink[]) {

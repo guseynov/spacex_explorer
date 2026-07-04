@@ -11,9 +11,9 @@ import {
 
 const favorite: FavoriteLaunch = {
   id: "launch-1",
-  name: "CRS-1",
+  name: "Sicily Etna Activity",
   net: "2020-01-01T00:00:00.000Z",
-  status: { id: 3, name: "Launch Successful", abbrev: "Success" },
+  status: { id: 1, name: "Active Event", abbrev: "Active" },
   imageUrl: "https://images2.imgbox.com/test.png",
 };
 
@@ -34,7 +34,7 @@ describe("favorites reducer", () => {
     });
   });
 
-  it("toggles launches on and off", () => {
+  it("toggles events on and off", () => {
     const addedState = favoritesReducer(initialFavoritesState, {
       type: "toggle",
       payload: favorite,
@@ -50,7 +50,7 @@ describe("favorites reducer", () => {
     expect(removedState.items).toEqual([]);
   });
 
-  it("removes launches by id", () => {
+  it("removes events by id", () => {
     const nextState = favoritesReducer(
       {
         items: [favorite],

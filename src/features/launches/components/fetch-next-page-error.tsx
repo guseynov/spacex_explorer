@@ -12,7 +12,7 @@ export function FetchNextPageError({
   return (
     <div className="panel px-5 py-4 text-sm text-[var(--muted)]">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p>We could not load more launches.</p>
+        <p>We could not load more events.</p>
         <button
           type="button"
           onClick={loadNextPage}

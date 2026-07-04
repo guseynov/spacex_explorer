@@ -9,14 +9,14 @@ import {
   BarChart3,
   Bookmark,
   Columns3,
+  Globe2,
   Menu,
   Radio,
-  Rocket,
   X,
 } from "lucide-react";
 
 const navLinks = [
-  { href: "/" as Route, label: "Launches", icon: Rocket },
+  { href: "/" as Route, label: "Events", icon: Globe2 },
   { href: "/trends" as Route, label: "Trends", icon: BarChart3 },
   { href: "/favorites" as Route, label: "Favorites", icon: Bookmark },
   {
@@ -32,25 +32,25 @@ export function SiteHeader() {
   const isActive = (href: (typeof navLinks)[number]["href"]) => pathname === href;
 
   return (
-    <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[rgba(7,9,12,0.92)] backdrop-blur-xl">
-      <div className="mx-auto flex min-h-16 w-full max-w-[1600px] items-center gap-6 px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[rgba(7,11,20,0.82)] backdrop-blur-xl">
+      <div className="mx-auto flex min-h-14 w-full max-w-[1400px] items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center gap-3">
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-[10px] bg-[var(--accent)] text-[var(--accent-ink)]">
-            <Rocket className="h-[18px] w-[18px]" strokeWidth={2.2} />
-            <span className="absolute -right-1 -bottom-1 h-2.5 w-2.5 rounded-full border-2 border-[var(--background)] bg-[var(--success)]" />
+          <span className="relative flex h-8 w-8 items-center justify-center rounded-[4px] border border-[rgba(147,197,253,0.22)] bg-[rgba(68,144,245,0.14)] text-[var(--accent-strong)]">
+            <Globe2 className="h-[16px] w-[16px]" strokeWidth={2.1} />
+            <span className="absolute -right-1 -bottom-1 h-2.5 w-2.5 rounded-full border border-[var(--background)] bg-[var(--success)]" />
           </span>
-          <span className="flex items-baseline gap-1.5">
-            <span className="type-display text-[0.98rem] font-semibold tracking-[-0.02em] text-foreground">
-              SpaceX
+          <span className="flex flex-col leading-none">
+            <span className="type-display text-[1.12rem] font-semibold tracking-[0.02em] text-foreground">
+              NASA Earth
             </span>
-            <span className="type-mono text-[0.72rem] font-medium text-[var(--muted)]">
+            <span className="type-mono text-[0.6rem] font-medium uppercase tracking-[0.18em] text-[var(--muted)]">
               Explorer
             </span>
           </span>
         </Link>
 
         <nav aria-label="Primary" className="hidden min-w-0 flex-1 lg:block">
-          <ul className="flex items-center justify-center gap-1">
+          <ul className="flex items-center gap-2">
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
@@ -58,13 +58,13 @@ export function SiteHeader() {
                   <Link
                     href={link.href}
                     className={clsx(
-                      "flex min-h-10 items-center gap-2 rounded-[8px] px-3.5 text-[0.84rem] font-medium transition-colors",
+                      "type-mono flex min-h-9 items-center gap-2 rounded-[4px] px-3 text-[0.68rem] font-medium uppercase tracking-[0.12em] transition-colors",
                       isActive(link.href)
-                        ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]"
-                        : "text-[var(--muted)] hover:bg-[var(--surface)] hover:text-foreground",
+                        ? "border border-[rgba(68,144,245,0.34)] bg-[rgba(68,144,245,0.12)] text-[var(--accent-strong)]"
+                        : "border border-transparent text-[var(--muted)] hover:border-[var(--border)] hover:bg-[rgba(255,255,255,0.03)] hover:text-[var(--info)]",
                     )}
                   >
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-3.5 w-3.5" />
                     {link.label}
                   </Link>
                 </li>
@@ -73,9 +73,9 @@ export function SiteHeader() {
           </ul>
         </nav>
 
-        <div className="ml-auto hidden items-center gap-2 text-[0.72rem] font-medium text-[var(--muted)] sm:flex">
+        <div className="ml-auto hidden items-center gap-2 rounded-[4px] border border-[var(--border)] bg-[rgba(255,255,255,0.03)] px-3 py-2 type-mono text-[0.62rem] font-medium uppercase tracking-[0.12em] text-[var(--muted)] sm:flex">
           <Radio className="h-3.5 w-3.5 text-[var(--success)]" />
-          <span>Launch Library online</span>
+          <span>EONET feed online</span>
         </div>
 
         <button
@@ -94,7 +94,7 @@ export function SiteHeader() {
         id="primary-navigation"
         aria-label="Primary mobile"
         className={clsx(
-          "border-t border-[var(--border)] bg-[var(--background-strong)] px-4 py-3 lg:hidden",
+          "border-t border-[var(--border)] bg-[rgba(7,11,20,0.95)] px-4 py-3 lg:hidden",
           mobileMenuOpen ? "block" : "hidden",
         )}
       >
@@ -107,10 +107,10 @@ export function SiteHeader() {
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={clsx(
-                    "flex min-h-11 items-center gap-2.5 rounded-[8px] px-3 text-sm font-medium",
+                    "type-mono flex min-h-11 items-center gap-2.5 rounded-[4px] border px-3 text-[0.68rem] font-medium uppercase tracking-[0.12em]",
                     isActive(link.href)
-                      ? "bg-[var(--accent-soft)] text-[var(--accent-strong)]"
-                      : "bg-[var(--surface)] text-[var(--muted)]",
+                      ? "border-[rgba(68,144,245,0.34)] bg-[rgba(68,144,245,0.12)] text-[var(--accent-strong)]"
+                      : "border-[var(--border)] bg-[rgba(255,255,255,0.03)] text-[var(--muted)]",
                   )}
                 >
                   <Icon className="h-4 w-4" />
