@@ -68,7 +68,7 @@ vercel --prod
 curl -X POST "https://<your-project>.vercel.app/api/cron/eonet-sync?secret=<EONET_SYNC_SECRET>"
 ```
 
-5. The included [vercel.json](./vercel.json) runs `/api/cron/eonet-sync` every 6 hours on Vercel Cron.
+5. The included [vercel.json](./vercel.json) runs `/api/cron/eonet-sync` once per day at 02:00 UTC, which works on Vercel Hobby. On Pro, you can change the schedule to `0 */6 * * *` for a six-hour sync cadence.
 
 API keys:
 
