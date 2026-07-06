@@ -1,57 +1,127 @@
-# EONET Explorer
+# Earth Event Explorer
 
-EONET Explorer is a Next.js, React, and TypeScript app for browsing live NASA EONET earth events. It focuses on typed API boundaries, server-assisted filtering, local favorites and compare state, and responsive list/detail views without bundled fallback data.
+Earth Event Explorer is a Next.js, React, and TypeScript app for exploring NASA EONET natural events through a DB-backed mirror. The app centers the globe, timeline, and event list instead of a generic card grid, while keeping typed API normalization, favorites, and compare state.
 
-## How to run
+## Run Locally On WSL2
+
+Run Postgres, apply the schema, and sync EONET before starting the app:
 
 ```bash
+cp .env.example .env.local
+docker compose up -d postgres
 npm install
+npm run db:generate
+npm run db:migrate
+npm run eonet:sync
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Useful scripts:
+For a larger historical dataset, run:
 
 ```bash
-npm run lint
-npm run build
-npm run test:run
-npm run test:e2e
+npm run eonet:backfill
 ```
 
-## Stack and architecture
+Useful commands:
 
-- `Next.js App Router` handles the explorer, detail, favorites, compare, and trends routes with route-level loading and error states.
-- `TanStack Query` manages caching, deduplication, retry behavior, and load-more pagination.
-- `Tailwind CSS` provides the styling base with a small global token layer in `globals.css`.
-- `Zod` validates the normalized event shape at the API boundary so the UI consumes typed data only.
+```bash
+npm run db:generate
+npm run db:migrate
+npm run db:deploy
+npm run lint
+npm run typecheck
+npm run test:run
+npm run build
+npm run test:e2e
+npm run eonet:sync
+npm run eonet:backfill
+```
 
-## API usage
+## Deploy On Vercel
+
+1. Create a Postgres database and copy its pooled connection string into `DATABASE_URL`.
+   - Vercel Postgres integrations: [https://vercel.com/docs/postgres](https://vercel.com/docs/postgres)
+   - Neon also works: [https://neon.com/docs/connect/connect-from-any-app](https://neon.com/docs/connect/connect-from-any-app)
+
+2. Set Vercel environment variables:
+
+```bash
+DATABASE_URL=postgresql://...
+EONET_SYNC_SECRET=<generate-a-long-random-string>
+NEXT_PUBLIC_MAP_STYLE_URL=<optional-maplibre-style-url>
+```
+
+3. The included Vercel build command runs migrations before the Next.js build:
+
+```bash
+npm run db:deploy && npm run build
+```
+
+The install command can stay as `npm install`; `postinstall` runs `prisma generate`.
+
+4. Deploy, then seed the database once:
+
+```bash
+vercel --prod
+curl -X POST "https://<your-project>.vercel.app/api/cron/eonet-sync?secret=<EONET_SYNC_SECRET>"
+```
+
+5. The included [vercel.json](./vercel.json) runs `/api/cron/eonet-sync` every 6 hours on Vercel Cron.
+
+API keys:
+
+- NASA EONET does not require an API key: [https://eonet.gsfc.nasa.gov/docs/v3](https://eonet.gsfc.nasa.gov/docs/v3)
+- A map key is optional. Without `NEXT_PUBLIC_MAP_STYLE_URL`, local/dev uses the public MapLibre demo style. For production, use a MapLibre-compatible provider such as MapTiler: [https://docs.maptiler.com/cloud/api/authentication-key/](https://docs.maptiler.com/cloud/api/authentication-key/)
+- Vercel Marketplace Postgres providers or Neon provide `DATABASE_URL` through their dashboard; no NASA key is needed.
+
+## Stack
+
+- `Next.js App Router` for the explorer, event detail, favorites, compare, and API routes.
+- `TanStack Query` for client-side caching and refetch behavior.
+- `Tailwind CSS` plus a small token layer in [src/app/globals.css](./src/app/globals.css).
+- `Zod` for validated event schemas at the EONET boundary.
+- `MapLibre GL JS` for the interactive map.
+- `Prisma` with Postgres for the mirrored EONET dataset and sync runs.
+
+## API shape
 
 Upstream API:
 
 - [https://eonet.gsfc.nasa.gov/api/v3](https://eonet.gsfc.nasa.gov/api/v3)
 
-Endpoints used:
+App routes:
 
-- `GET /events`
-- `GET /events/:id`
-- `GET /categories`
+- `GET /api/events`
+- `GET /api/events/[id]`
+- `GET /api/events/timeline`
+- `GET /api/sync/status`
 
-The app maps UI filters to EONET `status`, `category`, `start`, `end`, and `days` parameters. Browser requests pass through `/api/events`, which normalizes responses and caches upstream GET traffic for five minutes. Search and some sorting are applied after fetch because EONET does not expose the same query surface as the previous launch provider.
+The browser API reads from the mirrored database and returns event-first types:
 
-## Performance and accessibility
+- `Event`
+- `EventStatus`
+- `EventCategory`
+- `EventSource`
+- `EventGeometry`
+- `EventListPage`
+- `FavoriteEvent`
 
-- Search requests are debounced by 300ms.
-- React Query stale times are currently 60s for both list and detail queries.
-- The trends page aggregates recent event volume and closure rate from live EONET data.
-- Retry behavior only retries `429` and `5xx` responses with a small backoff.
-- Favorites and compare selections persist in `localStorage`.
-- Semantic headings, labeled controls, focus styles, and `aria-live` updates are included throughout the explorer flow.
+The list route supports `status`, `category`, `from`, `to`, `sort`, `search`, `page`, and `limit`. Timeline buckets come from the mirrored database and the browser never needs to hit NASA directly during normal browsing.
 
-## Tradeoffs
+## Map configuration
 
-- The event list remains client-fetched so filters, search, and load-more stay responsive.
-- The detail route is server-rendered from one normalized EONET event response.
-- E2E coverage runs against the live EONET-backed app shell, so browser tests can still be affected by upstream volatility.
+MapLibre style is configurable through:
+
+```bash
+NEXT_PUBLIC_MAP_STYLE_URL=https://your-style-host/style.json
+```
+
+If that variable is not set, the app falls back to the public MapLibre demo style for local development.
+
+## Notes
+
+- Favorites and compare selections persist in `localStorage` under the current EONET event shape.
+- `npm run eonet:sync` refreshes the recent mirror window; `npm run eonet:backfill` fills historical data in throttled windows.
+- Playwright coverage targets the map-first explorer, detail route, favorites, and compare flow.

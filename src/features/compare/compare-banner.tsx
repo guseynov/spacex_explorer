@@ -35,7 +35,7 @@ export function CompareBanner() {
                 key={item.id}
                 className="inline-flex items-center rounded-[6px] bg-[var(--surface)] px-2.5 py-1 text-[0.76rem] font-medium text-[var(--info)]"
               >
-                {item.name}
+                {item.title}
               </span>
             ))}
           </div>

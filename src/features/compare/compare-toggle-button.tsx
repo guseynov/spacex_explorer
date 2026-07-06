@@ -2,16 +2,16 @@
 
 import clsx from "clsx";
 import { Columns3Icon } from "lucide-react";
-import type { FavoriteLaunch } from "@/lib/api/schemas";
+import type { FavoriteEvent } from "@/lib/api/event-schemas";
 import { useCompare } from "./compare-context";
 
 export function CompareToggleButton({
-  launch,
+  event,
 }: {
-  launch: FavoriteLaunch;
+  event: FavoriteEvent;
 }) {
   const { items, isSelected, toggleCompare } = useCompare();
-  const selected = isSelected(launch.id);
+  const selected = isSelected(event.id);
   const label = selected
     ? "Remove from compare"
     : items.length >= 2
@@ -23,7 +23,7 @@ export function CompareToggleButton({
       type="button"
       aria-pressed={selected}
       aria-label={label}
-      onClick={() => toggleCompare(launch)}
+      onClick={() => toggleCompare(event)}
       className={clsx(
         "type-mono inline-flex items-center gap-1.5 text-[0.64rem] font-medium uppercase tracking-[0.1em] transition-colors",
         selected

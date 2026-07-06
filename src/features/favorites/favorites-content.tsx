@@ -1,6 +1,8 @@
 import Link from "next/link";
+import type { Route } from "next";
 import { EmptyState } from "@/components/empty-state";
-import { LaunchCard } from "@/features/launches/components/launch-card";
+import { useCompare } from "@/features/compare/compare-context";
+import { EventListCard } from "@/features/events/components/event-list-card";
 import type { useFavorites } from "./favorites-context";
 
 export function FavoritesContent({
@@ -12,6 +14,8 @@ export function FavoritesContent({
   items: ReturnType<typeof useFavorites>["items"];
   removeFavorite: ReturnType<typeof useFavorites>["removeFavorite"];
 }) {
+  const { isSelected, toggleCompare } = useCompare();
+
   if (!hasHydrated) {
     return (
       <div className="panel panel-strong px-6 py-10 text-[var(--muted)]">
@@ -38,29 +42,17 @@ export function FavoritesContent({
   }
 
   return (
-    <div className="launch-list-shell overflow-hidden rounded-[0.5rem]">
-      {items.map((launch, index) => (
-        <div
-          key={launch.id}
-          className={
-            index === items.length - 1
-              ? undefined
-              : "border-b border-[var(--border)]"
-          }
-        >
-          <LaunchCard
-            launch={launch}
-            actionSlot={
-              <button
-                type="button"
-                onClick={() => removeFavorite(launch.id)}
-                className="button-secondary px-4 py-2 text-sm font-semibold transition hover:border-[var(--danger)] hover:text-[var(--danger)]"
-              >
-                Remove
-              </button>
-            }
-          />
-        </div>
+    <div className="space-y-3">
+      {items.map((event) => (
+        <EventListCard
+          key={event.id}
+          event={event}
+          saved
+          compared={isSelected(event.id)}
+          onToggleSave={() => removeFavorite(event.id)}
+          onToggleCompare={() => toggleCompare(event)}
+          detailHref={`/events/${event.id}` as Route}
+        />
       ))}
     </div>
   );

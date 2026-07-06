@@ -1,10 +1,11 @@
-export class LaunchApiError extends Error {
+export class EventApiError extends Error {
   constructor(
     message: string,
     public readonly status: number,
+    options?: ErrorOptions,
   ) {
-    super(message);
-    this.name = "LaunchApiError";
+    super(message, options);
+    this.name = "EventApiError";
   }
 }
 
@@ -12,7 +13,7 @@ export function shouldRetryRequest(
   failureCount: number,
   error: Error,
 ) {
-  if (!(error instanceof LaunchApiError)) {
+  if (!(error instanceof EventApiError)) {
     return failureCount < 2;
   }
 

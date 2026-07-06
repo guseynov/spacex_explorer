@@ -1,20 +1,20 @@
-import { LaunchApiError, retryDelay, shouldRetryRequest } from "./errors";
+import { EventApiError, retryDelay, shouldRetryRequest } from "./errors";
 
 describe("retry policy", () => {
   it("retries rate limits and server errors twice", () => {
-    expect(shouldRetryRequest(0, new LaunchApiError("rate limit", 429))).toBe(
+    expect(shouldRetryRequest(0, new EventApiError("rate limit", 429))).toBe(
       true,
     );
-    expect(shouldRetryRequest(1, new LaunchApiError("server", 503))).toBe(
+    expect(shouldRetryRequest(1, new EventApiError("server", 503))).toBe(
       true,
     );
-    expect(shouldRetryRequest(2, new LaunchApiError("server", 503))).toBe(
+    expect(shouldRetryRequest(2, new EventApiError("server", 503))).toBe(
       false,
     );
   });
 
   it("does not retry non-retryable client errors", () => {
-    expect(shouldRetryRequest(0, new LaunchApiError("bad request", 404))).toBe(
+    expect(shouldRetryRequest(0, new EventApiError("bad request", 404))).toBe(
       false,
     );
   });

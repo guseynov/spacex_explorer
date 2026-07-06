@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EventStatus {
+  active
+  closed
+}
+
+enum SyncRunStatus {
+  running
+  success
+  failed
+}
+
+enum SyncRunType {
+  incremental
+  backfill
+  manual
+}
+
+model Event {
+  id                  String         @id
+  title               String
+  description         String?
+  link                String?
+  status              EventStatus
+  closedAt            DateTime?
+  firstObservedAt     DateTime?
+  latestObservedAt    DateTime?
+  primaryCategoryId   String?
+  primaryCategoryTitle String?
+  primarySourceId     String?
+  primarySourceTitle  String?
+  primaryLongitude    Float?
+  primaryLatitude     Float?
+  searchText          String         @db.Text
+  raw                 Json
+  upstreamUpdatedAt   DateTime?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  geometries EventGeometry[]
+  categories  EventCategory[]
+  sources     EventSource[]
+
+  @@index([status])
+  @@index([firstObservedAt])
+  @@index([latestObservedAt])
+  @@index([closedAt])
+  @@index([primaryCategoryId])
+  @@index([primaryLongitude, primaryLatitude])
+}
+
+model EventGeometry {
+  id                   String   @id @default(cuid())
+  eventId              String
+  observedAt           DateTime?
+  geometryType         String?
+  longitude            Float?
+  latitude             Float?
+  magnitudeValue       Float?
+  magnitudeUnit        String?
+  magnitudeDescription String?
+  coordinateHash       String
+  raw                  Json
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, coordinateHash, observedAt])
+  @@index([eventId])
+  @@index([observedAt])
+  @@index([longitude, latitude])
+}
+
+model Category {
+  id          String          @id
+  title       String
+  description String?
+  raw         Json?
+  events      EventCategory[]
+}
+
+model Source {
+  id        String         @id
+  title     String?
+  sourceUrl String?
+  raw       Json?
+  events    EventSource[]
+}
+
+model EventCategory {
+  eventId    String
+  categoryId  String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, categoryId])
+  @@index([categoryId])
+}
+
+model EventSource {
+  eventId String
+  sourceId String
+  event    Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  source   Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@id([eventId, sourceId])
+  @@index([sourceId])
+}
+
+model SyncRun {
+  id                  String        @id @default(cuid())
+  startedAt           DateTime
+  finishedAt          DateTime?
+  status              SyncRunStatus
+  type                SyncRunType
+  windowStart         DateTime?
+  windowEnd           DateTime?
+  upstreamRequestCount Int           @default(0)
+  eventsFetched       Int           @default(0)
+  eventsUpserted      Int           @default(0)
+  error               String?
+  createdAt           DateTime      @default(now())
+}

@@ -6,7 +6,7 @@ import {
   useEffect,
   useReducer,
 } from "react";
-import type { FavoriteLaunch } from "@/lib/api/schemas";
+import type { FavoriteEvent } from "@/lib/api/event-schemas";
 import {
   compareReducer,
   initialCompareState,
@@ -15,10 +15,10 @@ import {
 } from "./compare-reducer";
 
 type CompareContextValue = {
-  items: FavoriteLaunch[];
+  items: FavoriteEvent[];
   hasHydrated: boolean;
   isSelected: (id: string) => boolean;
-  toggleCompare: (launch: FavoriteLaunch) => void;
+  toggleCompare: (event: FavoriteEvent) => void;
   clearCompare: () => void;
 };
 
@@ -53,8 +53,8 @@ export function CompareProvider({
     items: state.items,
     hasHydrated: state.hasHydrated,
     isSelected: (id) => state.items.some((item) => item.id === id),
-    toggleCompare: (launch) =>
-      dispatch({ type: "toggle", payload: launch }),
+    toggleCompare: (event) =>
+      dispatch({ type: "toggle", payload: event }),
     clearCompare: () => dispatch({ type: "clear" }),
   };
 

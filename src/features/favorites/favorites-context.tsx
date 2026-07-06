@@ -6,7 +6,7 @@ import {
   useEffect,
   useReducer,
 } from "react";
-import type { FavoriteLaunch } from "@/lib/api/schemas";
+import type { FavoriteEvent } from "@/lib/api/event-schemas";
 import {
   favoritesReducer,
   initialFavoritesState,
@@ -15,10 +15,10 @@ import {
 } from "./favorites-reducer";
 
 type FavoritesContextValue = {
-  items: FavoriteLaunch[];
+  items: FavoriteEvent[];
   hasHydrated: boolean;
   isFavorite: (id: string) => boolean;
-  toggleFavorite: (launch: FavoriteLaunch) => void;
+  toggleFavorite: (event: FavoriteEvent) => void;
   removeFavorite: (id: string) => void;
 };
 
@@ -53,8 +53,8 @@ export function FavoritesProvider({
     items: state.items,
     hasHydrated: state.hasHydrated,
     isFavorite: (id) => state.items.some((item) => item.id === id),
-    toggleFavorite: (launch) =>
-      dispatch({ type: "toggle", payload: launch }),
+    toggleFavorite: (event) =>
+      dispatch({ type: "toggle", payload: event }),
     removeFavorite: (id) => dispatch({ type: "remove", payload: id }),
   };
 

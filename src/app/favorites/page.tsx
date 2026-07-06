@@ -6,9 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function FavoritesRoute() {
-  return (
-    <div className="h-full overflow-auto pr-1">
-      <FavoritesPage />
-    </div>
-  );
+  return <FavoritesPage />;
 }

@@ -1,17 +1,17 @@
-import type { FavoriteLaunch } from "@/lib/api/schemas";
-import { favoriteLaunchSchema } from "@/lib/api/schemas";
+import type { FavoriteEvent } from "@/lib/api/event-schemas";
+import { favoriteEventSchema } from "@/lib/api/event-schemas";
 
 export const COMPARE_STORAGE_KEY = "eonet-explorer:compare";
 export const MAX_COMPARE_ITEMS = 2;
 
 export type CompareState = {
-  items: FavoriteLaunch[];
+  items: FavoriteEvent[];
   hasHydrated: boolean;
 };
 
 export type CompareAction =
-  | { type: "hydrate"; payload: FavoriteLaunch[] }
-  | { type: "toggle"; payload: FavoriteLaunch }
+  | { type: "hydrate"; payload: FavoriteEvent[] }
+  | { type: "toggle"; payload: FavoriteEvent }
   | { type: "clear" };
 
 export const initialCompareState: CompareState = {
@@ -74,19 +74,18 @@ export function readCompareFromStorage() {
 
   try {
     const parsed = JSON.parse(rawValue) as unknown;
-    const result = favoriteLaunchSchema.array().safeParse(parsed);
-
-    if (!result.success) {
-      return [];
-    }
-
-    return result.data;
+    return Array.isArray(parsed)
+      ? parsed.flatMap((item) => {
+          const result = favoriteEventSchema.safeParse(item);
+          return result.success ? [result.data] : [];
+        })
+      : [];
   } catch {
     return [];
   }
 }
 
-export function writeCompareToStorage(items: FavoriteLaunch[]) {
+export function writeCompareToStorage(items: FavoriteEvent[]) {
   if (typeof window === "undefined") {
     return;
   }

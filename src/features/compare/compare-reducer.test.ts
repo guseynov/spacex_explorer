@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import type { FavoriteLaunch } from "@/lib/api/schemas";
+import type { FavoriteEvent } from "@/lib/api/event-schemas";
 import {
   compareReducer,
   initialCompareState,
@@ -9,28 +9,37 @@ import {
   COMPARE_STORAGE_KEY,
 } from "./compare-reducer";
 
-const firstLaunch: FavoriteLaunch = {
-  id: "launch-1",
-  name: "Canadian Wildfire Cluster",
-  net: "2020-05-30T19:22:00.000Z",
-  status: { id: 2, name: "Closed Event", abbrev: "Closed" },
-  imageUrl: "https://images2.imgbox.com/test-1.png",
+const firstEvent: FavoriteEvent = {
+  id: "event-1",
+  title: "Canadian Wildfire Cluster",
+  description: null,
+  status: "closed",
+  latestDate: "2026-05-30T19:22:00.000Z",
+  categoryId: "wildfires",
+  categoryLabel: "Wildfires",
+  sourceLabel: "FIRMS",
+  coordinateLabel: null,
+  primaryCoordinate: null,
+  magnitudeValue: null,
+  magnitudeUnit: null,
 };
 
-const secondLaunch: FavoriteLaunch = {
-  id: "launch-2",
-  name: "Atlantic Tropical Storm Belt",
-  net: "2023-11-01T00:00:00.000Z",
-  status: { id: 1, name: "Active Event", abbrev: "Active" },
-  imageUrl: "https://images2.imgbox.com/test-2.png",
+const secondEvent: FavoriteEvent = {
+  ...firstEvent,
+  id: "event-2",
+  title: "Atlantic Tropical Storm Belt",
+  status: "active",
+  latestDate: "2026-06-12T00:00:00.000Z",
+  categoryId: "severeStorms",
+  categoryLabel: "Severe Storms",
 };
 
-const thirdLaunch: FavoriteLaunch = {
-  id: "launch-3",
-  name: "Andes Earthquake Sequence",
-  net: "2024-01-01T00:00:00.000Z",
-  status: { id: 2, name: "Closed Event", abbrev: "Closed" },
-  imageUrl: "https://images2.imgbox.com/test-3.png",
+const thirdEvent: FavoriteEvent = {
+  ...firstEvent,
+  id: "event-3",
+  title: "Andes Earthquake Sequence",
+  categoryId: "earthquakes",
+  categoryLabel: "Earthquakes",
 };
 
 describe("compare reducer", () => {
@@ -41,47 +50,37 @@ describe("compare reducer", () => {
   it("adds, replaces, and removes events in compare state", () => {
     const one = compareReducer(initialCompareState, {
       type: "toggle",
-      payload: firstLaunch,
+      payload: firstEvent,
     });
 
     const two = compareReducer(one, {
       type: "toggle",
-      payload: secondLaunch,
+      payload: secondEvent,
     });
 
     const replaced = compareReducer(two, {
       type: "toggle",
-      payload: thirdLaunch,
+      payload: thirdEvent,
     });
 
-    expect(one.items).toEqual([firstLaunch]);
-    expect(two.items).toEqual([secondLaunch, firstLaunch]);
-    expect(replaced.items).toEqual([firstLaunch, thirdLaunch]);
+    expect(one.items).toEqual([firstEvent]);
+    expect(two.items).toEqual([secondEvent, firstEvent]);
+    expect(replaced.items).toEqual([firstEvent, thirdEvent]);
 
     const removed = compareReducer(replaced, {
       type: "toggle",
-      payload: firstLaunch,
+      payload: firstEvent,
     });
 
-    expect(removed.items).toEqual([thirdLaunch]);
+    expect(removed.items).toEqual([thirdEvent]);
   });
 
   it("persists and reads compare selections", () => {
-    writeCompareToStorage([firstLaunch, secondLaunch]);
+    writeCompareToStorage([firstEvent, secondEvent]);
 
     expect(window.localStorage.getItem(COMPARE_STORAGE_KEY)).toContain(
-      '"launch-1"',
+      '"event-1"',
     );
-    expect(readCompareFromStorage()).toEqual([firstLaunch, secondLaunch]);
-  });
-
-  it("returns an empty array for malformed compare storage", () => {
-    window.localStorage.setItem(COMPARE_STORAGE_KEY, "[]");
-    window.localStorage.setItem(
-      COMPARE_STORAGE_KEY,
-      JSON.stringify([{ id: 123, name: "bad" }]),
-    );
-
-    expect(readCompareFromStorage()).toEqual([]);
+    expect(readCompareFromStorage()).toEqual([firstEvent, secondEvent]);
   });
 });

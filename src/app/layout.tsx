@@ -4,6 +4,7 @@ import {
   Inter,
   JetBrains_Mono,
 } from "next/font/google";
+import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 import { AppProviders } from "./providers";
 import { SiteHeader } from "@/components/site-header";
@@ -28,11 +29,11 @@ const barlowCondensed = Barlow_Condensed({
 export const metadata: Metadata = {
   metadataBase: new URL("https://eonet-explorer.local"),
   title: {
-    default: "EONET Explorer",
-    template: "%s | EONET Explorer",
+    default: "Earth Event Explorer",
+    template: "%s | Earth Event Explorer",
   },
   description:
-    "Explore live NASA EONET natural events with server-side filtering, typed data fetching, and saved favorites.",
+    "Explore NASA EONET natural events through a DB-backed, map-first Earth observation dashboard.",
 };
 
 export default function RootLayout({
@@ -50,9 +51,9 @@ export default function RootLayout({
         <AppProviders>
           <div className="relative z-10 flex min-h-dvh flex-col">
             <SiteHeader />
-            <div className="mx-auto flex min-h-0 w-full max-w-[1400px] flex-1 flex-col px-4 sm:px-6 lg:px-8">
+            <div className="flex min-h-0 w-full flex-1 flex-col px-3 pb-3 sm:px-4 sm:pb-4 lg:px-5 lg:pb-5">
               <CompareBanner />
-              <main className="min-h-0 flex-1 overflow-x-hidden py-6 sm:py-8">
+              <main className="min-h-0 flex-1 overflow-hidden pt-3 sm:pt-4">
                 {children}
               </main>
             </div>

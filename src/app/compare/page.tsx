@@ -11,12 +11,10 @@ export default async function CompareRoute(props: {
   const searchParams = await props.searchParams;
 
   return (
-    <div className="h-full overflow-auto pr-1">
-      <ComparePage
-        leftId={getSearchParam(searchParams.left)}
-        rightId={getSearchParam(searchParams.right)}
-      />
-    </div>
+    <ComparePage
+      leftId={getSearchParam(searchParams.left)}
+      rightId={getSearchParam(searchParams.right)}
+    />
   );
 }
 

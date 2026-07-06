@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import clsx from "clsx";
 import {
-  BarChart3,
   Bookmark,
   Columns3,
   Globe2,
@@ -17,7 +16,6 @@ import {
 
 const navLinks = [
   { href: "/" as Route, label: "Events", icon: Globe2 },
-  { href: "/trends" as Route, label: "Trends", icon: BarChart3 },
   { href: "/favorites" as Route, label: "Favorites", icon: Bookmark },
   {
     href: "/compare" as unknown as Route,
@@ -44,7 +42,7 @@ export function SiteHeader() {
               NASA Earth
             </span>
             <span className="type-mono text-[0.6rem] font-medium uppercase tracking-[0.18em] text-[var(--muted)]">
-              Explorer
+              Event Explorer
             </span>
           </span>
         </Link>

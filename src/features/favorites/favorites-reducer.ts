@@ -1,16 +1,16 @@
-import type { FavoriteLaunch } from "@/lib/api/schemas";
-import { favoriteLaunchSchema } from "@/lib/api/schemas";
+import type { FavoriteEvent } from "@/lib/api/event-schemas";
+import { favoriteEventSchema } from "@/lib/api/event-schemas";
 
 export const FAVORITES_STORAGE_KEY = "eonet-explorer:favorites";
 
 export type FavoritesState = {
-  items: FavoriteLaunch[];
+  items: FavoriteEvent[];
   hasHydrated: boolean;
 };
 
 export type FavoritesAction =
-  | { type: "hydrate"; payload: FavoriteLaunch[] }
-  | { type: "toggle"; payload: FavoriteLaunch }
+  | { type: "hydrate"; payload: FavoriteEvent[] }
+  | { type: "toggle"; payload: FavoriteEvent }
   | { type: "remove"; payload: string };
 
 export const initialFavoritesState: FavoritesState = {
@@ -62,19 +62,18 @@ export function readFavoritesFromStorage() {
 
   try {
     const parsed = JSON.parse(rawValue) as unknown;
-    const result = favoriteLaunchSchema.array().safeParse(parsed);
-
-    if (!result.success) {
-      return [];
-    }
-
-    return result.data;
+    return Array.isArray(parsed)
+      ? parsed.flatMap((item) => {
+          const result = favoriteEventSchema.safeParse(item);
+          return result.success ? [result.data] : [];
+        })
+      : [];
   } catch {
     return [];
   }
 }
 
-export function writeFavoritesToStorage(items: FavoriteLaunch[]) {
+export function writeFavoritesToStorage(items: FavoriteEvent[]) {
   if (typeof window === "undefined") {
     return;
   }

@@ -8,11 +8,11 @@ export function FavoritesPage() {
   const { items, hasHydrated, removeFavorite } = useFavorites();
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto flex w-full max-w-[1100px] flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
       <SectionHeading
         eyebrow="Bookmarks"
         title="Favorite events"
-        description="Your saved NASA EONET events live locally in this browser, ready for quick revisits."
+        description="Your saved EONET events live locally in this browser, ready for quick revisits."
       />
       <FavoritesContent
         hasHydrated={hasHydrated}
