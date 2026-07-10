@@ -1,6 +1,5 @@
 "use client";
 
-import clsx from "clsx";
 import { useEffect, useState } from "react";
 import {
   eventCategoryOptions,
@@ -10,6 +9,15 @@ import {
   getEventSortLabel,
   type EventListQueryParams,
 } from "@/lib/api/event-query-builder";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type EventFiltersProps = {
   filters: EventListQueryParams;
@@ -21,7 +29,7 @@ export function EventFilters({ filters, onChange }: EventFiltersProps) {
     <div className="space-y-4">
       <div className="grid gap-3">
         <label className="grid gap-1.5">
-          <span className="type-mono text-[0.6rem] uppercase tracking-[0.16em] text-[var(--muted)]">
+          <span className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Search
           </span>
           <EventSearchInput
@@ -32,77 +40,86 @@ export function EventFilters({ filters, onChange }: EventFiltersProps) {
         </label>
 
         <label className="grid gap-1.5">
-          <span className="type-mono text-[0.6rem] uppercase tracking-[0.16em] text-[var(--muted)]">
+          <span className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Sort
           </span>
-          <select
-            aria-label="Sort events"
+          <Select
             value={filters.sort}
-            onChange={(event) =>
-              onChange({ sort: event.target.value as EventListQueryParams["sort"] })
+            onValueChange={(value) =>
+              onChange({ sort: value as EventListQueryParams["sort"] })
             }
-            className="control-input control-select min-h-11 w-full px-3 text-sm"
           >
-            {eventSortOptions.map((option) => (
-              <option key={option} value={option}>
-                {getEventSortLabel(option)}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger aria-label="Sort events">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {eventSortOptions.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {getEventSortLabel(option)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </label>
       </div>
 
       <div className="space-y-2">
-        <div className="type-mono text-[0.6rem] uppercase tracking-[0.16em] text-[var(--muted)]">
+        <div className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Status
         </div>
-        <div className="flex flex-wrap gap-2">
+        <ToggleGroup
+          type="single"
+          value={filters.status}
+          onValueChange={(status) => {
+            if (status) {
+              onChange({ status: status as EventListQueryParams["status"] });
+            }
+          }}
+        >
           {[
             EventStatusFilter.All,
             EventStatusFilter.Active,
             EventStatusFilter.Closed,
           ].map((status) => (
-            <button
+            <ToggleGroupItem
               key={status}
-              type="button"
-              onClick={() => onChange({ status })}
-              className={clsx(
-                "filter-chip",
-                filters.status === status && "filter-chip-active",
-              )}
+              value={status}
             >
               {status === EventStatusFilter.All
                 ? "All"
                 : status === EventStatusFilter.Active
                   ? "Active"
                   : "Closed"}
-            </button>
+            </ToggleGroupItem>
           ))}
-        </div>
+        </ToggleGroup>
       </div>
 
       <div className="space-y-2">
-        <div className="type-mono text-[0.6rem] uppercase tracking-[0.16em] text-[var(--muted)]">
+        <div className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
           Category
         </div>
-        <div className="flex flex-wrap gap-2">
+        <ToggleGroup
+          type="single"
+          value={filters.category}
+          onValueChange={(category) => {
+            if (category) {
+              onChange({ category: category as EventListQueryParams["category"] });
+            }
+          }}
+        >
           {eventCategoryOptions.map((category) => (
-            <button
+            <ToggleGroupItem
               key={category.value}
-              type="button"
-              onClick={() => onChange({ category: category.value })}
-              className={clsx(
-                "filter-chip",
-                filters.category === category.value && "filter-chip-active",
-              )}
+              value={category.value}
               title={getEventCategoryLabel(category.value)}
             >
               {category.value === "all"
                 ? "All"
                 : category.label.replace("All categories", "All")}
-            </button>
+            </ToggleGroupItem>
           ))}
-        </div>
+        </ToggleGroup>
       </div>
     </div>
   );
@@ -129,12 +146,11 @@ function EventSearchInput({ initialValue, onCommit }: EventSearchInputProps) {
   }, [draftSearch, initialValue, onCommit]);
 
   return (
-    <input
+    <Input
       aria-label="Event search"
       value={draftSearch}
       onChange={(event) => setDraftSearch(event.target.value)}
       placeholder="Search events"
-      className="control-input min-h-11 w-full px-3 text-sm"
     />
   );
 }

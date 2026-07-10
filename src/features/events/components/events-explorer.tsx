@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { EventListPage } from "@/lib/api/event-schemas";
-import { fetchEventTimeline, fetchEventsPage } from "@/lib/api/event-client";
+import { fetchEventsPage } from "@/lib/api/event-client";
 import { getTimelineDomain, type EventListQueryParams } from "@/lib/api/event-query-builder";
 import {
   filterVisibleRangeEvents,
@@ -75,28 +75,6 @@ export function EventsExplorer({
     refetchOnWindowFocus: false,
     retry: 1,
   });
-  const timelineQuery = useQuery({
-    queryKey: [
-      "events-timeline",
-      filters.status,
-      filters.category,
-      timelineDomain.from,
-      timelineDomain.to,
-    ],
-    queryFn: () =>
-      fetchEventTimeline({
-        status: filters.status,
-        category: filters.category,
-        from: timelineDomain.from,
-        to: timelineDomain.to,
-        bucket: "day",
-      }),
-    placeholderData: (previousData) => previousData,
-    staleTime: 300_000,
-    gcTime: 900_000,
-    refetchOnWindowFocus: false,
-    retry: 1,
-  });
 
   const visibleSourceEvents = useMemo(
     () => rangeQuery.data?.results ?? initialData.results ?? [],
@@ -107,26 +85,12 @@ export function EventsExplorer({
     [filters, visibleSourceEvents],
   );
   const totalVisibleEvents = rangeQuery.data?.count ?? visibleSourceEvents.length;
-  const summary = rangeQuery.data?.summary ?? initialData.summary ?? null;
   const activeSelectedEventId = useMemo(
     () =>
       selectedEventId && events.some((event) => event.id === selectedEventId)
         ? selectedEventId
         : null,
     [events, selectedEventId],
-  );
-
-  const histogram = useMemo(
-    () =>
-      timelineQuery.data
-        ? buildHistogramFromBuckets(
-          timelineQuery.data.buckets,
-          timelineDomain.from,
-          timelineDomain.to,
-          36,
-        )
-        : summary?.histogram ?? [],
-    [summary?.histogram, timelineDomain.from, timelineDomain.to, timelineQuery.data],
   );
 
   const handleTimelineChange = (
@@ -175,7 +139,7 @@ export function EventsExplorer({
   }
 
   return (
-    <section className="relative min-h-[calc(100dvh-8.5rem)] overflow-hidden rounded-[1.35rem] border border-[var(--border)] bg-[radial-gradient(circle_at_top,rgba(68,144,245,0.16),transparent_32rem),linear-gradient(180deg,#040910_0%,#050913_45%,#050913_100%)]">
+    <section className="relative min-h-dvh overflow-hidden bg-[radial-gradient(circle_at_top,rgba(68,144,245,0.16),transparent_32rem),linear-gradient(180deg,#040910_0%,#050913_45%,#050913_100%)]">
       <div className="absolute inset-0">
         <EventsMap
           events={events}
@@ -193,14 +157,13 @@ export function EventsExplorer({
           key={`${filters.from}:${filters.to}`}
           domain={timelineDomain}
           value={{ from: filters.from, to: filters.to }}
-          histogram={histogram}
           eventCount={totalVisibleEvents}
-          isPending={(rangeQuery.isFetching && !rangeQuery.data) || timelineQuery.isFetching}
+          isPending={rangeQuery.isFetching && !rangeQuery.data}
           onChange={handleTimelineChange}
         />
       </div>
 
-      <div className="absolute inset-x-3 bottom-3 z-20 top-[10.75rem] md:inset-y-3 md:left-auto md:w-[26rem]">
+      <div className="absolute left-3 right-3 top-[10.75rem] z-20 bottom-3 md:inset-y-3 md:left-auto md:w-[26rem]">
         <EventSidePanel
           events={events}
           filters={filters}
@@ -220,29 +183,4 @@ export function EventsExplorer({
       </div>
     </section>
   );
-}
-
-function buildHistogramFromBuckets(
-  buckets: Array<{ bucket: string; count: number }>,
-  from: string,
-  to: string,
-  bins: number,
-) {
-  const histogram = new Array(bins).fill(0);
-  const start = new Date(`${from}T00:00:00.000Z`).getTime();
-  const end = new Date(`${to}T23:59:59.999Z`).getTime();
-  const total = Math.max(end - start, 1);
-
-  for (const bucket of buckets) {
-    const time = new Date(bucket.bucket).getTime();
-    if (Number.isNaN(time) || time < start || time > end) {
-      continue;
-    }
-
-    const ratio = (time - start) / total;
-    const index = Math.min(bins - 1, Math.max(0, Math.floor(ratio * bins)));
-    histogram[index] += bucket.count;
-  }
-
-  return histogram;
 }

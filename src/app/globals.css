@@ -20,6 +20,23 @@
   --warning: #fbbf24;
   --danger: #f87171;
   --info: #c5d0e8;
+  --card: rgba(11, 17, 31, 0.94);
+  --card-foreground: #e5edf9;
+  --popover: rgba(8, 13, 24, 0.98);
+  --popover-foreground: #e5edf9;
+  --primary: #4490f5;
+  --primary-foreground: #ffffff;
+  --secondary: rgba(255, 255, 255, 0.05);
+  --secondary-foreground: #dbe7fb;
+  --muted-surface: rgba(255, 255, 255, 0.04);
+  --muted-foreground: #8b99b9;
+  --accent-surface: rgba(68, 144, 245, 0.14);
+  --accent-foreground: #b7d7ff;
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+  --input: rgba(255, 255, 255, 0.09);
+  --ring: rgba(68, 144, 245, 0.42);
+  --radius: 1rem;
   --font-display-stack: var(--font-display), "Barlow Condensed", sans-serif;
   --font-body-stack: var(--font-body), "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono-stack: var(--font-mono), "JetBrains Mono", ui-monospace, monospace;
@@ -31,8 +48,30 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted-surface);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent-surface);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --font-sans: var(--font-body-stack);
   --font-mono: var(--font-mono-stack);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.75);
+  --radius-md: calc(var(--radius) * 0.9);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.2);
+  --radius-2xl: calc(var(--radius) * 1.5);
 }
 
 * {
@@ -59,15 +98,8 @@ body {
 
 h1,
 h2,
-h3,
-.type-display {
+h3 {
   font-family: var(--font-display-stack);
-}
-
-.type-mono {
-  font-family: var(--font-mono-stack);
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
 }
 
 a {
@@ -81,6 +113,10 @@ select {
   font: inherit;
 }
 
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 ::selection {
   background: rgba(68, 144, 245, 0.28);
 }
@@ -90,142 +126,6 @@ select {
   outline-offset: 3px;
 }
 
-.app-kicker {
-  font-family: var(--font-mono-stack);
-  font-size: 0.64rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.panel {
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: linear-gradient(180deg, rgba(17, 24, 39, 0.72) 0%, rgba(10, 15, 28, 0.96) 100%);
-  box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(18px);
-}
-
-.panel-strong {
-  background: linear-gradient(180deg, rgba(8, 12, 24, 0.96) 0%, rgba(4, 8, 18, 1) 100%);
-}
-
-.button-primary {
-  cursor: pointer;
-  border: 1px solid rgba(68, 144, 245, 0.42);
-  background: rgba(68, 144, 245, 0.14);
-  color: var(--accent-strong);
-  border-radius: 0.8rem;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    color 160ms ease;
-}
-
-.button-primary:hover {
-  border-color: rgba(147, 197, 253, 0.52);
-  background: rgba(68, 144, 245, 0.2);
-  color: var(--accent-ink);
-}
-
-.button-secondary {
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--info);
-  border-radius: 0.8rem;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    color 160ms ease;
-}
-
-.button-secondary:hover {
-  border-color: var(--border-strong);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--foreground);
-}
-
-.control-shell {
-  border: 1px solid var(--border);
-  border-radius: 1rem;
-  background: linear-gradient(180deg, rgba(13, 18, 32, 0.92) 0%, rgba(10, 15, 28, 0.98) 100%);
-  box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(18px);
-}
-
-.control-input {
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--foreground);
-  border-radius: 0.8rem;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    color 160ms ease;
-}
-
-.control-input:hover:not(:disabled) {
-  border-color: rgba(147, 197, 253, 0.18);
-}
-
-.control-input:focus {
-  border-color: rgba(68, 144, 245, 0.5);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.control-input::placeholder {
-  color: rgba(197, 208, 232, 0.46);
-}
-
-.control-input:disabled {
-  cursor: not-allowed;
-  opacity: 0.48;
-}
-
-.control-select {
-  appearance: none;
-  padding-right: 3rem;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none"><path d="M4.25 6.25 8 10l3.75-3.75" stroke="%23c5d0e8" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></svg>');
-  background-position: right 0.95rem center;
-  background-repeat: no-repeat;
-  background-size: 0.95rem;
-}
-
-.filter-chip {
-  min-height: 2.35rem;
-  cursor: pointer;
-  border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--muted);
-  border-radius: 999px;
-  padding: 0.55rem 0.85rem;
-  font-family: var(--font-mono-stack);
-  font-size: 0.62rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-align: center;
-  text-transform: uppercase;
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    color 160ms ease;
-}
-
-.filter-chip:hover:not(:disabled) {
-  border-color: var(--border-strong);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--info);
-}
-
-.filter-chip-active,
-.filter-chip[data-active="true"] {
-  border-color: rgba(68, 144, 245, 0.42);
-  background: rgba(68, 144, 245, 0.14);
-  color: var(--accent-strong);
-}
-
 .maplibregl-popup-content {
   border: 1px solid rgba(147, 197, 253, 0.18);
   border-radius: 0.9rem;
@@ -233,6 +133,13 @@ select {
   color: var(--foreground);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.44);
   padding: 0.85rem 0.9rem;
+}
+
+.event-map-popup-selected .maplibregl-popup-content {
+  border-color: rgba(147, 197, 253, 0.32);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.44),
+    0 0 0 1px rgba(68, 144, 245, 0.18);
 }
 
 .maplibregl-popup-tip {

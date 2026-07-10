@@ -84,6 +84,22 @@ export function createEventFeatureCollection(
   };
 }
 
+export function createSelectedEventFeatureCollection(
+  events: Event[],
+  selectedEventId: string | null,
+): EventFeatureCollection {
+  if (!selectedEventId) {
+    return {
+      type: "FeatureCollection",
+      features: [],
+    };
+  }
+
+  const selectedEvent = events.find((event) => event.id === selectedEventId);
+
+  return createEventFeatureCollection(selectedEvent ? [selectedEvent] : []);
+}
+
 export function getEventBounds(events: Event[]) {
   const coordinates = events
     .map((event) => event.primaryCoordinate)

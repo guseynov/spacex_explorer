@@ -1,7 +1,7 @@
 "use client";
 
-import clsx from "clsx";
 import { Columns3Icon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { FavoriteEvent } from "@/lib/api/event-schemas";
 import { useCompare } from "./compare-context";
 
@@ -19,20 +19,17 @@ export function CompareToggleButton({
       : "Add to compare";
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="sm"
       aria-pressed={selected}
       aria-label={label}
       onClick={() => toggleCompare(event)}
-      className={clsx(
-        "type-mono inline-flex items-center gap-1.5 text-[0.64rem] font-medium uppercase tracking-[0.1em] transition-colors",
-        selected
-          ? "text-[var(--accent-strong)]"
-          : "text-[var(--muted)] hover:text-[var(--foreground)]",
-      )}
+      className={selected ? "text-[var(--accent-strong)]" : ""}
     >
       <Columns3Icon className="h-3.5 w-3.5" />
       {selected ? "Selected" : "Compare"}
-    </button>
+    </Button>
   );
 }

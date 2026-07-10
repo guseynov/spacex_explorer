@@ -1,6 +1,9 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { EmptyState } from "@/components/empty-state";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCompare } from "@/features/compare/compare-context";
 import { EventListCard } from "@/features/events/components/event-list-card";
 import type { useFavorites } from "./favorites-context";
@@ -18,9 +21,13 @@ export function FavoritesContent({
 
   if (!hasHydrated) {
     return (
-      <div className="panel panel-strong px-6 py-10 text-[var(--muted)]">
-        Loading saved events...
-      </div>
+      <Card className="bg-card/96">
+        <CardContent className="space-y-3 px-6 py-6">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-28 rounded-xl" />
+          <Skeleton className="h-28 rounded-xl" />
+        </CardContent>
+      </Card>
     );
   }
 
@@ -30,12 +37,9 @@ export function FavoritesContent({
         title="No saved events yet"
         description="Save events from the explorer or detail pages to build your shortlist."
         action={
-          <Link
-            href="/"
-            className="button-primary inline-flex px-5 py-3 text-sm font-semibold transition"
-          >
-            Explore events
-          </Link>
+          <Button asChild>
+            <Link href="/">Explore events</Link>
+          </Button>
         }
       />
     );

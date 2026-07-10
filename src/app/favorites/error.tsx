@@ -1,5 +1,8 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
 export default function Error({
   error,
   reset,
@@ -8,25 +11,23 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="panel px-6 py-12 text-center sm:px-10">
-      <div className="mx-auto max-w-xl space-y-4">
-        <p className="text-sm font-medium text-[var(--danger)]">
-          Favorites failed to load
-        </p>
-        <h2 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">
-          Your saved events are temporarily unavailable.
-        </h2>
-        <p className="text-base leading-7 text-[var(--muted)]">
-          {error.message || "Try loading the favorites page again."}
-        </p>
-        <button
-          type="button"
-          onClick={() => reset()}
-          className="button-primary px-5 py-3 text-sm font-semibold transition"
-        >
-          Try again
-        </button>
-      </div>
-    </div>
+    <Card className="bg-card/96 text-center">
+      <CardContent className="px-6 py-12 sm:px-10">
+        <div className="mx-auto max-w-xl space-y-4">
+          <p className="text-sm font-medium text-destructive">
+            Favorites failed to load
+          </p>
+          <h2 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">
+            Your saved events are temporarily unavailable.
+          </h2>
+          <p className="text-base leading-7 text-muted-foreground">
+            {error.message || "Try loading the favorites page again."}
+          </p>
+          <Button type="button" onClick={() => reset()}>
+            Try again
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

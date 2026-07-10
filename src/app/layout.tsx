@@ -7,8 +7,6 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 import { AppProviders } from "./providers";
-import { SiteHeader } from "@/components/site-header";
-import { CompareBanner } from "@/features/compare/compare-banner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -49,15 +47,9 @@ export default function RootLayout({
     >
       <body className="relative min-h-dvh overflow-x-hidden text-foreground">
         <AppProviders>
-          <div className="relative z-10 flex min-h-dvh flex-col">
-            <SiteHeader />
-            <div className="flex min-h-0 w-full flex-1 flex-col px-3 pb-3 sm:px-4 sm:pb-4 lg:px-5 lg:pb-5">
-              <CompareBanner />
-              <main className="min-h-0 flex-1 overflow-hidden pt-3 sm:pt-4">
-                {children}
-              </main>
-            </div>
-          </div>
+          <main className="relative z-10 min-h-dvh overflow-hidden">
+            {children}
+          </main>
         </AppProviders>
       </body>
     </html>
