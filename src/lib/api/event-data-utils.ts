@@ -1,6 +1,7 @@
 import type { Event, EventListPage } from "./event-schemas";
 import {
   EventSortOption,
+  EventStatusFilter,
   type EventListQueryParams,
   type EventSortOptionValue,
 } from "./event-query-builder";
@@ -25,10 +26,15 @@ export function filterEventsForExplorer(
 
 export function filterVisibleRangeEvents(
   events: Event[],
-  filters: Pick<EventListQueryParams, "search" | "sort">,
+  filters: Pick<EventListQueryParams, "search" | "sort"> &
+    Partial<Pick<EventListQueryParams, "category" | "status">>,
 ) {
   return sortEvents(
-    events.filter((event) => matchesEventSearch(event, filters.search)),
+    events.filter((event) =>
+      matchesEventSearch(event, filters.search)
+      && (!filters.category || filters.category === "all" || event.categoryId === filters.category)
+      && (!filters.status || filters.status === EventStatusFilter.All || event.status === filters.status)
+    ),
     filters.sort,
   );
 }

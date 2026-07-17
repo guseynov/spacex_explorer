@@ -65,4 +65,19 @@ describe("favorites reducer", () => {
     );
     expect(readFavoritesFromStorage()).toEqual([favorite]);
   });
+
+  it("ignores legacy launch favorites", () => {
+    window.localStorage.setItem(
+      FAVORITES_STORAGE_KEY,
+      JSON.stringify([
+        {
+          id: "legacy-launch-1",
+          name: "Old saved launch",
+          status: "Success",
+        },
+      ]),
+    );
+
+    expect(readFavoritesFromStorage()).toEqual([]);
+  });
 });

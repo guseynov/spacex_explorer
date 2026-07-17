@@ -4,17 +4,9 @@ import Link from "next/link";
 import { forwardRef } from "react";
 import type { Route } from "next";
 import {
-  Activity,
   Bookmark,
-  Cloud,
-  Droplets,
-  Flame,
   GitCompare,
-  Mountain,
   MoveUpRight,
-  Snowflake,
-  Wind,
-  Zap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +18,8 @@ import {
 } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
 import { getEventCategoryColor } from "../event-map-utils";
+import { getEventSourceDisplayName } from "../event-display";
+import { getEventCategoryIcon } from "./event-category-icon";
 
 type EventCardData = FavoriteEvent;
 
@@ -56,7 +50,7 @@ export const EventListCard = forwardRef<HTMLDivElement, EventListCardProps>(
     },
     ref,
   ) {
-    const Icon = getCategoryIcon(event.categoryId);
+    const Icon = getEventCategoryIcon(event.categoryId);
     const categoryColor = getEventCategoryColor(event.categoryId);
     const statusLabel = getEventStatusLabel(event.status);
     const hasMapLocation = Boolean(event.primaryCoordinate);
@@ -64,17 +58,19 @@ export const EventListCard = forwardRef<HTMLDivElement, EventListCardProps>(
     return (
       <Card
         ref={ref}
+        role="article"
         className={cn(
           "transition-colors",
           selected
-            ? "border-primary/45 bg-card"
-            : "border-border bg-card/90",
+            ? "border-[var(--brand)] bg-[var(--brand-soft)]"
+            : "border-border bg-card",
         )}
       >
-        <CardContent className="space-y-3 px-4 py-4">
-          <div className="flex flex-wrap items-center gap-2">
+        <CardContent className="grid gap-4 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+          <div className="min-w-0 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
             <Badge
-              className="gap-1 text-[0.62rem]"
+              className="gap-1"
               style={{
                 color: categoryColor,
                 borderColor: `${categoryColor}40`,
@@ -86,27 +82,27 @@ export const EventListCard = forwardRef<HTMLDivElement, EventListCardProps>(
             </Badge>
             <Badge
               variant={event.status === "active" ? "success" : "secondary"}
-              className="text-[0.58rem]"
             >
               {statusLabel}
             </Badge>
             {selected ? (
-              <Badge variant="secondary" className="text-[0.58rem]">
+              <Badge variant="secondary">
                 On map
               </Badge>
             ) : null}
-          </div>
+            </div>
 
-          <div className="space-y-1.5">
-            <h2 className="line-clamp-2 text-[0.98rem] font-semibold leading-5 text-foreground">
+            <div className="space-y-1.5">
+            <h2 className="line-clamp-2 text-base font-semibold leading-6 text-foreground">
               {event.title}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {formatEventDateOnly(event.latestDate)} · {event.sourceLabel}
+              {formatEventDateOnly(event.latestDate)} · {getEventSourceDisplayName(event.sourceLabel)}
             </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 sm:max-w-[18rem] sm:justify-end">
             {onViewOnMap ? (
               <Button
                 type="button"
@@ -130,7 +126,7 @@ export const EventListCard = forwardRef<HTMLDivElement, EventListCardProps>(
             {detailHref ? (
               <Button asChild variant="secondary" size="sm">
                 <Link href={detailHref}>
-                  Open
+                  View details
                 </Link>
               </Button>
             ) : null}
@@ -168,24 +164,3 @@ export const EventListCard = forwardRef<HTMLDivElement, EventListCardProps>(
     );
   },
 );
-
-function getCategoryIcon(categoryId: string) {
-  switch (categoryId) {
-    case "wildfires":
-      return Flame;
-    case "severeStorms":
-      return Cloud;
-    case "floods":
-      return Droplets;
-    case "volcanoes":
-      return Mountain;
-    case "seaLakeIce":
-      return Snowflake;
-    case "dustHaze":
-      return Wind;
-    case "earthquakes":
-      return Activity;
-    default:
-      return Zap;
-  }
-}

@@ -49,6 +49,7 @@ export async function getEventStoreSummary(
 
   return page.summary ?? {
     count: 0,
+    mirrorCount: 0,
     histogram: [],
     syncedAt: null,
   };

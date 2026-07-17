@@ -63,6 +63,7 @@ export const eventListPageSchema = z.object({
   summary: z
     .object({
       count: z.number(),
+      mirrorCount: z.number(),
       histogram: z.array(z.number()),
       syncedAt: z.string().nullable(),
     })

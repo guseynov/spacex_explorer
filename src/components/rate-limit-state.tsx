@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Clock3 } from "lucide-react";
 
 export function RateLimitState({
   title = "Event feed temporarily unavailable",
@@ -14,12 +14,9 @@ export function RateLimitState({
   const router = useRouter();
 
   return (
-    <Card className="bg-card/96 text-center">
-      <CardContent className="px-6 py-12 sm:px-10">
+    <div className="border border-[var(--warning)]/25 bg-[var(--warning)]/5 px-6 py-12 text-center sm:px-10">
         <div className="mx-auto max-w-xl space-y-4">
-          <p className="text-sm font-medium text-[var(--warning)]">
-            Rate limited
-          </p>
+          <Clock3 aria-hidden="true" className="mx-auto size-6 text-[var(--warning)]" />
           <h2 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">
             {title}
           </h2>
@@ -28,7 +25,6 @@ export function RateLimitState({
             Refresh page
           </Button>
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

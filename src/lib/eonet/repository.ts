@@ -35,8 +35,9 @@ export async function queryEventRepositoryPage(
   const where = buildEventWhere(filters);
   const offset = Math.max(page - 1, 0) * limit;
 
-  const [total, pageRows, histogramRows, syncStatus] = await Promise.all([
+  const [total, mirrorCount, pageRows, histogramRows, syncStatus] = await Promise.all([
     prisma.event.count({ where }),
+    prisma.event.count(),
     prisma.event.findMany({
       where,
       include: eventInclude,
@@ -64,6 +65,7 @@ export async function queryEventRepositoryPage(
   const histogram = buildTimelineHistogram(histogramRows, 36);
   const summary = {
     count: histogramRows.length,
+    mirrorCount,
     histogram,
     syncedAt: syncStatus.lastSuccessfulSyncAt,
   };

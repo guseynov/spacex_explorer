@@ -35,7 +35,7 @@ function SheetOverlay({
     <DialogPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-background/80 backdrop-blur-sm",
+        "fixed inset-0 z-50 bg-black/68",
         className,
       )}
       {...props}
@@ -57,11 +57,11 @@ function SheetContent({
       <DialogPrimitive.Content
         data-slot="sheet-content"
         className={cn(
-          "fixed z-50 flex flex-col gap-4 border border-border bg-card p-5 shadow-xl outline-none",
+          "fixed z-50 flex flex-col gap-4 border border-border bg-card p-5 shadow-lg outline-none",
           side === "right" && "inset-y-0 right-0 h-full w-full max-w-sm border-l",
           side === "left" && "inset-y-0 left-0 h-full w-full max-w-sm border-r",
           side === "top" && "inset-x-0 top-0 border-b",
-          side === "bottom" && "inset-x-0 bottom-0 border-t",
+          side === "bottom" && "inset-x-0 bottom-0 max-h-[88dvh] rounded-t-xl border-t",
           className,
         )}
         {...props}

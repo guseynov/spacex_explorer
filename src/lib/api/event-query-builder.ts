@@ -1,9 +1,9 @@
-import { formatISO, subDays, subYears } from "date-fns";
+import { formatISO, subDays } from "date-fns";
 import type { Event, FavoriteEvent } from "./event-schemas";
 
 export const EVENT_PAGE_SIZE = 1000;
 export const DEFAULT_TIMELINE_DAYS = 90;
-export const TIMELINE_DOMAIN_YEARS = 5;
+export const TIMELINE_DOMAIN_START = "2018-01-01";
 
 export const EventStatusFilter = {
   All: "all",
@@ -84,7 +84,7 @@ export function createBaseEventFilters(
 
 export function getTimelineDomain(now = new Date()) {
   return {
-    min: toDateOnly(subYears(now, TIMELINE_DOMAIN_YEARS)),
+    min: TIMELINE_DOMAIN_START,
     max: toDateOnly(now),
   };
 }
@@ -229,7 +229,7 @@ export function getEventCategoryLabel(category: string) {
 export function getEventStatusLabel(status: EventStatusFilterValue) {
   switch (status) {
     case EventStatusFilter.Active:
-      return "Active";
+      return "Open";
     case EventStatusFilter.Closed:
       return "Closed";
     case EventStatusFilter.All:

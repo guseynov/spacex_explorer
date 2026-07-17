@@ -1,11 +1,16 @@
 "use client";
 
-import { addDays, differenceInCalendarDays } from "date-fns";
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
-import { Pause, Play } from "lucide-react";
+import { addDays, differenceInCalendarDays, format } from "date-fns";
+import {
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
+import { CalendarDays, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { DatePicker } from "@/components/ui/date-picker";
 import { formatEventRangeLabel } from "@/lib/formatters";
 import { normalizeEventDateRange } from "@/lib/api/event-query-builder";
@@ -32,27 +37,26 @@ export function TimelineRangeSlider({
   onChange,
 }: TimelineRangeSliderProps) {
   const [localRange, setLocalRange] = useState(value);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [datesExpanded, setDatesExpanded] = useState(false);
   const [activeHandle, setActiveHandle] = useState<"start" | "end" | null>(null);
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const dragHandleRef = useRef<"start" | "end" | null>(null);
   const localRangeRef = useRef(value);
-  const windowLength = Math.max(
-    1,
-    differenceInCalendarDays(
-      new Date(localRange.to),
-      new Date(localRange.from),
-    ),
-  );
   const totalDays = Math.max(
     1,
     differenceInCalendarDays(new Date(domain.to), new Date(domain.from)),
   );
   const startIndex = toIndex(localRange.from, domain.from, totalDays);
   const endIndex = toIndex(localRange.to, domain.from, totalDays);
-  const animationFrameRef = useRef<number | null>(null);
-  const overlapThreshold = Math.max(2, Math.round(totalDays * 0.008));
-  const handlesOverlap = endIndex - startIndex <= overlapThreshold;
+  const viewport = getTimelineViewport(domain, value);
+  const viewportDays = Math.max(
+    1,
+    differenceInCalendarDays(new Date(viewport.to), new Date(viewport.from)),
+  );
+  const viewportStartIndex = toIndex(localRange.from, viewport.from, viewportDays);
+  const viewportEndIndex = toIndex(localRange.to, viewport.from, viewportDays);
+  const overlapThreshold = Math.max(2, Math.round(viewportDays * 0.008));
+  const handlesOverlap = viewportEndIndex - viewportStartIndex <= overlapThreshold;
   const startHandleTop = handlesOverlap ? 7 : 19;
   const endHandleTop = handlesOverlap ? 27 : 19;
   const rangeCollapsed = startIndex === endIndex;
@@ -66,47 +70,20 @@ export function TimelineRangeSlider({
     return normalizedRange;
   };
 
-  useEffect(() => {
-    if (!isPlaying) {
-      if (animationFrameRef.current) {
-        window.clearInterval(animationFrameRef.current);
-      }
-      return;
-    }
-
-    animationFrameRef.current = window.setInterval(() => {
-      const nextStart = Math.min(startIndex + 1, totalDays - windowLength);
-      const nextEnd = Math.min(nextStart + windowLength, totalDays);
-      const nextRange = {
-        from: toDateFromIndex(domain.from, nextStart),
-        to: toDateFromIndex(domain.from, nextEnd),
-      };
-
-      if (nextEnd >= totalDays) {
-        setIsPlaying(false);
-      }
-
-      syncLocalRange(nextRange);
-      onChange(nextRange);
-    }, 480);
-
-    return () => {
-      if (animationFrameRef.current) {
-        window.clearInterval(animationFrameRef.current);
-      }
-    };
-  }, [domain.from, isPlaying, onChange, startIndex, totalDays, windowLength]);
-
   const ticks = useMemo(() => {
     return [0, 0.25, 0.5, 0.75, 1].map((ratio) => {
-      const dayOffset = Math.round(totalDays * ratio);
+      const dayOffset = Math.round(viewportDays * ratio);
+      const tickDate = toDateFromIndex(
+        viewport.from,
+        Math.min(dayOffset, viewportDays),
+      );
 
       return {
-        label: toDateFromIndex(domain.from, Math.min(dayOffset, totalDays)).slice(0, 7),
+        label: formatTimelineTick(tickDate, viewportDays),
         offset: ratio * 100,
       };
     });
-  }, [domain.from, totalDays]);
+  }, [viewport.from, viewportDays]);
 
   const presets = [
     { label: "7D", days: 7 },
@@ -161,12 +138,15 @@ export function TimelineRangeSlider({
     const nextIndex = toIndexFromClientX(
       clientX,
       slider.getBoundingClientRect(),
-      totalDays,
+      viewportDays,
     );
 
     if (handle === "start") {
       applyRangeUpdate({
-        from: toDateFromIndex(domain.from, Math.min(nextIndex, endIndex)),
+        from: toDateFromIndex(
+          viewport.from,
+          Math.min(nextIndex, viewportEndIndex),
+        ),
         to: localRangeRef.current.to,
       });
 
@@ -175,7 +155,10 @@ export function TimelineRangeSlider({
 
     applyRangeUpdate({
       from: localRangeRef.current.from,
-      to: toDateFromIndex(domain.from, Math.max(nextIndex, startIndex)),
+      to: toDateFromIndex(
+        viewport.from,
+        Math.max(nextIndex, viewportStartIndex),
+      ),
     });
   };
 
@@ -258,60 +241,70 @@ export function TimelineRangeSlider({
     });
   };
 
-  return (
-    <Card className="bg-card/92">
-      <CardContent className="space-y-4 px-4 py-4 md:px-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="space-y-1">
-            <div className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Timeline
-            </div>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-foreground/88">
-              <span>{formatEventRangeLabel(localRange.from, localRange.to)}</span>
-              <Badge className="px-2 py-1 text-[0.58rem]">
-                {eventCount} events
-              </Badge>
-              {isPending ? (
-                <span className="text-[0.62rem] uppercase tracking-[0.14em] text-muted-foreground">
-                  Syncing
-                </span>
-              ) : null}
-            </div>
-          </div>
+  const isPresetActive = (days: number) => {
+    const presetFrom = toDateFromIndex(
+      domain.from,
+      Math.max(totalDays - days, 0),
+    );
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              size="icon"
-              onClick={() => setIsPlaying((current) => !current)}
-              aria-label={isPlaying ? "Pause timeline playback" : "Play timeline playback"}
-            >
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
+    return localRange.from === presetFrom && localRange.to === domain.to;
+  };
+
+  return (
+    <section
+      aria-label="Event timeline"
+      data-map-overlay="timeline"
+      className="rounded-xl border border-border bg-[var(--panel-strong)] px-3 py-3 shadow-lg md:px-4"
+    >
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-2.5 text-sm text-foreground">
+          <CalendarDays className="size-4 shrink-0 text-[var(--brand)]" />
+          <span className="truncate tabular-nums font-medium">
+            {formatEventRangeLabel(localRange.from, localRange.to)}
+          </span>
+          <Badge className="hidden px-2 py-1 sm:inline-flex">
+            {eventCount.toLocaleString()} events
+          </Badge>
+          {isPending ? <span className="text-xs text-muted-foreground">Updating</span> : null}
+        </div>
+
+        <div className="ml-auto flex items-center gap-1">
+          <div className="flex overflow-hidden rounded-md border border-border">
             {presets.map((preset) => (
-              <Button
+              <button
                 key={preset.label}
                 type="button"
-                variant="secondary"
-                size="sm"
+                aria-pressed={isPresetActive(preset.days)}
                 onClick={() =>
                   commitExplicitRange({
                     from: toDateFromIndex(domain.from, Math.max(totalDays - preset.days, 0)),
                     to: domain.to,
                   })
                 }
-                className="uppercase tracking-[0.14em]"
+                className="h-9 min-w-10 border-r border-border px-2 text-xs font-semibold text-muted-foreground transition-colors last:border-r-0 hover:bg-secondary hover:text-foreground aria-pressed:bg-[var(--brand)] aria-pressed:text-primary-foreground"
               >
                 {preset.label}
-              </Button>
+              </button>
             ))}
           </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-expanded={datesExpanded}
+            onClick={() => setDatesExpanded((current) => !current)}
+            className="hidden sm:inline-flex"
+          >
+            {datesExpanded ? "Hide dates" : "Expand dates"}
+            <ChevronDown className={datesExpanded ? "size-4 rotate-180" : "size-4"} />
+          </Button>
         </div>
+      </div>
 
-        <div className="grid gap-3 md:grid-cols-2">
+      {datesExpanded ? (
+        <div className="mt-3 grid gap-3 border-t border-border pt-3 md:grid-cols-2">
           <label className="grid gap-1.5">
-            <span className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground">
               Start date
             </span>
             <DatePicker
@@ -329,7 +322,7 @@ export function TimelineRangeSlider({
             />
           </label>
           <label className="grid gap-1.5">
-            <span className="text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground">
               End date
             </span>
             <DatePicker
@@ -347,21 +340,19 @@ export function TimelineRangeSlider({
             />
           </label>
         </div>
+      ) : null}
 
-        <div
-          ref={sliderRef}
-          className="relative pt-3"
-        >
-          <div className="absolute inset-x-0 top-[19px] h-[3px] rounded-full bg-white/8" />
+      <div ref={sliderRef} className="relative mt-2 pt-3">
+          <div className="absolute inset-x-0 top-[19px] h-1 rounded-full bg-[var(--surface-muted)]" />
           <div
-            className="absolute top-[19px] h-[3px] rounded-full bg-[linear-gradient(90deg,rgba(147,197,253,0.9),rgba(68,144,245,0.6))]"
+            className="absolute top-[19px] h-1 rounded-full bg-[var(--brand)]"
             style={{
               left: rangeCollapsed
-                ? `calc(${(startIndex / totalDays) * 100}% - 3px)`
-                : `${(startIndex / totalDays) * 100}%`,
+                ? `calc(${(viewportStartIndex / viewportDays) * 100}% - 3px)`
+                : `${(viewportStartIndex / viewportDays) * 100}%`,
               width: rangeCollapsed
                 ? "6px"
-                : `${((endIndex - startIndex) / totalDays) * 100}%`,
+                : `${((viewportEndIndex - viewportStartIndex) / viewportDays) * 100}%`,
             }}
           />
           <button
@@ -380,12 +371,12 @@ export function TimelineRangeSlider({
             onKeyDown={(event) => handleKeyDown("start", event)}
             className="absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full"
             style={{
-              left: `${(startIndex / totalDays) * 100}%`,
+              left: `${(viewportStartIndex / viewportDays) * 100}%`,
               top: `${startHandleTop}px`,
               zIndex: activeHandle === "start" ? 4 : 3,
             }}
           >
-            <span className="absolute inset-[7px] rounded-full border border-[rgba(255,255,255,0.75)] bg-[#f8fbff] shadow-[0_0_0_6px_rgba(68,144,245,0.14),0_0_18px_rgba(68,144,245,0.28)]" />
+            <span className="absolute inset-[7px] rounded-full border border-[#eaf4ef] bg-[var(--brand)] shadow-[0_0_0_4px_#173b32]" />
           </button>
           <button
             type="button"
@@ -403,21 +394,20 @@ export function TimelineRangeSlider({
             onKeyDown={(event) => handleKeyDown("end", event)}
             className="absolute h-8 w-8 -translate-x-1/2 -translate-y-1/2 touch-none rounded-full"
             style={{
-              left: `${(endIndex / totalDays) * 100}%`,
+              left: `${(viewportEndIndex / viewportDays) * 100}%`,
               top: `${endHandleTop}px`,
               zIndex: activeHandle === "end" ? 4 : 2,
             }}
           >
-            <span className="absolute inset-[7px] rounded-full border border-[rgba(255,255,255,0.75)] bg-[#f8fbff] shadow-[0_0_0_6px_rgba(68,144,245,0.14),0_0_18px_rgba(68,144,245,0.28)]" />
+            <span className="absolute inset-[7px] rounded-full border border-[#eaf4ef] bg-[var(--brand)] shadow-[0_0_0_4px_#173b32]" />
           </button>
-          <div className="mt-7 flex justify-between text-[0.54rem] uppercase tracking-[0.14em] text-muted-foreground">
+          <div className="mt-7 flex justify-between text-[0.65rem] tabular-nums text-muted-foreground">
             {ticks.map((tick) => (
               <span key={tick.offset}>{tick.label}</span>
             ))}
           </div>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }
 
@@ -441,4 +431,60 @@ function toIndexFromClientX(clientX: number, rect: DOMRect, totalDays: number) {
   const ratio = clampNumber((clientX - rect.left) / rect.width, 0, 1);
 
   return Math.round(ratio * totalDays);
+}
+
+export function getTimelineViewport(
+  domain: { from: string; to: string },
+  value: { from: string; to: string },
+) {
+  const domainDays = Math.max(
+    1,
+    differenceInCalendarDays(new Date(domain.to), new Date(domain.from)),
+  );
+  const rangeStart = toIndex(value.from, domain.from, domainDays);
+  const rangeEnd = toIndex(value.to, domain.from, domainDays);
+  const rangeDays = Math.max(1, rangeEnd - rangeStart);
+
+  if (rangeDays >= domainDays * 0.75) {
+    return domain;
+  }
+
+  const viewportDays = Math.min(
+    domainDays,
+    Math.max(28, rangeDays * 4),
+  );
+  const paddingDays = viewportDays - rangeDays;
+  let viewportStart = rangeStart - Math.round(paddingDays / 2);
+  let viewportEnd = viewportStart + viewportDays;
+
+  if (viewportStart < 0) {
+    viewportEnd -= viewportStart;
+    viewportStart = 0;
+  }
+
+  if (viewportEnd > domainDays) {
+    viewportStart -= viewportEnd - domainDays;
+    viewportEnd = domainDays;
+  }
+
+  viewportStart = Math.max(0, viewportStart);
+
+  return {
+    from: toDateFromIndex(domain.from, viewportStart),
+    to: toDateFromIndex(domain.from, viewportEnd),
+  };
+}
+
+function formatTimelineTick(value: string, viewportDays: number) {
+  const date = new Date(`${value}T00:00:00.000Z`);
+
+  if (viewportDays <= 45) {
+    return format(date, "MMM d");
+  }
+
+  if (viewportDays <= 400) {
+    return format(date, "MMM yyyy");
+  }
+
+  return format(date, "yyyy-MM");
 }

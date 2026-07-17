@@ -14,11 +14,11 @@ export function formatEventDateOnly(dateUtc: string) {
 }
 
 export function formatEventRangeLabel(from: string, to: string) {
-  return `${formatEventDateOnly(from)} — ${formatEventDateOnly(to)}`;
+  return `${formatEventDateOnly(from)} to ${formatEventDateOnly(to)}`;
 }
 
 export function getEventStatusLabel(status: EventStatus) {
-  return status === "active" ? "Active" : "Closed";
+  return status === "active" ? "Open in feed" : "Closed in feed";
 }
 
 export function getEventStatusTone(status: EventStatus) {

@@ -1,45 +1,47 @@
 "use client";
 
+import { useEffect, useMemo, useState, type WheelEvent } from "react";
 import Link from "next/link";
-import type { Route } from "next";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronUp, ListFilter, SlidersHorizontal } from "lucide-react";
+import { ChevronRight, Search, SlidersHorizontal } from "lucide-react";
+import { List, type RowComponentProps, useListRef } from "react-window";
 import { EmptyState } from "@/components/empty-state";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import type {
-  Event,
-  EventListPage,
-} from "@/lib/api/event-schemas";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
-  countActiveEventFilters,
-  toFavoriteEvent,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Event, EventListPage } from "@/lib/api/event-schemas";
+import {
+  eventSortOptions,
+  EventStatusFilter,
+  getEventSortLabel,
   type EventListQueryParams,
 } from "@/lib/api/event-query-builder";
+import { formatEventDateOnly } from "@/lib/formatters";
 import { cn } from "@/lib/utils";
-import { useCompare } from "@/features/compare/compare-context";
-import { useFavorites } from "@/features/favorites/favorites-context";
-import { EventFilters } from "./event-filters";
-import { EventListCard } from "./event-list-card";
+import { getEventSourceDisplayName } from "../event-display";
+import { getEventCategoryColor } from "../event-map-utils";
+import { EventSearchField, EventFilters } from "./event-filters";
+import { EventCategoryIcon } from "./event-category-icon";
+import { EventCategoryPicker } from "./event-category-picker";
 
 type EventSidePanelProps = {
   events: Event[];
   filters: EventListQueryParams;
   totalCount: EventListPage["count"];
+  mirrorCount: number;
   selectedEventId: string | null;
   isLoading?: boolean;
   isSyncing?: boolean;
+  isMapAreaFiltered?: boolean;
   onChangeFilters: (updates: Partial<EventListQueryParams>) => void;
   onResetFilters: () => void;
   onViewOnMap: (id: string) => void;
@@ -50,223 +52,365 @@ export function EventSidePanel({
   events,
   filters,
   totalCount,
+  mirrorCount,
   selectedEventId,
   isLoading = false,
   isSyncing = false,
+  isMapAreaFiltered = false,
   onChangeFilters,
   onResetFilters,
   onViewOnMap,
   onSyncData,
 }: EventSidePanelProps) {
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const { isSelected, toggleCompare } = useCompare();
-  const [mobileOpen, setMobileOpen] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const cardRefs = useRef(new Map<string, HTMLDivElement>());
-  const activeFilterCount = countActiveEventFilters(filters);
-  const panelOpen = mobileOpen || selectedEventId !== null;
+  const listRef = useListRef(null);
+  const categorySelected = filters.category !== "all";
+  const statusFilterActive = filters.status !== EventStatusFilter.All;
+  const eventIndexById = useMemo(
+    () => new Map(events.map((event, index) => [event.id, index])),
+    [events],
+  );
+  const selectedEventIndex = selectedEventId
+    ? eventIndexById.get(selectedEventId)
+    : undefined;
+  const hasEventsOutsideSearchedArea =
+    isMapAreaFiltered && events.length === 0 && totalCount > 0;
+  const rowProps = useMemo<ResultRowProps>(
+    () => ({ events, selectedEventId, onSelectEvent: onViewOnMap }),
+    [events, onViewOnMap, selectedEventId],
+  );
 
   useEffect(() => {
-    if (!selectedEventId) {
+    if (selectedEventIndex === undefined) {
       return;
     }
 
-    cardRefs.current.get(selectedEventId)?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
+    listRef.current?.scrollToRow({
+      index: selectedEventIndex,
+      align: "smart",
+      behavior: "instant",
     });
-  }, [selectedEventId]);
+  }, [listRef, selectedEventIndex]);
 
-  const body = useMemo(() => {
-    if (isLoading && events.length === 0) {
-      return (
-        <div className="space-y-3 p-1">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-44 animate-pulse rounded-xl border border-border bg-secondary/60"
-            />
-          ))}
-        </div>
-      );
+  const handlePanelWheel = (event: WheelEvent<HTMLElement>) => {
+    const panelElement = event.currentTarget;
+    const listElement = listRef.current?.element;
+    const scrollingDown = event.deltaY > 0;
+    const panelCanScroll = scrollingDown
+      ? panelElement.scrollTop + panelElement.clientHeight <
+        panelElement.scrollHeight
+      : panelElement.scrollTop > 0;
+
+    if (
+      !listElement ||
+      listElement.contains(event.target as Node) ||
+      panelCanScroll ||
+      Math.abs(event.deltaY) <= Math.abs(event.deltaX)
+    ) {
+      return;
     }
 
-    if (events.length === 0) {
-      const description =
-        totalCount === 0
-          ? "No mirrored events are cached yet. Run the backend sync once, then the map and timeline will load from the local copy."
-          : "Try widening the timeline or clearing one of the active filters.";
-
-      return (
-        <EmptyState
-          title="No events found for this period"
-          description={description}
-          action={
-            <div className="flex flex-wrap items-center justify-center gap-3">
-              {totalCount === 0 && onSyncData ? (
-                <Button
-                  type="button"
-                  onClick={() => void onSyncData()}
-                  disabled={isSyncing}
-                >
-                  {isSyncing ? "Syncing data" : "Sync backend mirror"}
-                </Button>
-              ) : null}
-              <Button type="button" variant="secondary" onClick={onResetFilters}>
-                Reset filters
-              </Button>
-            </div>
-          }
-        />
-      );
-    }
-
-    return (
-      <div className="space-y-3 p-1">
-        {events.map((event) => (
-          <EventListCard
-            key={event.id}
-            ref={(node) => {
-              if (node) {
-                cardRefs.current.set(event.id, node);
-              } else {
-                cardRefs.current.delete(event.id);
-              }
-            }}
-            event={toFavoriteEvent(event)}
-            selected={selectedEventId === event.id}
-            saved={isFavorite(event.id)}
-            compared={isSelected(event.id)}
-            onViewOnMap={() => onViewOnMap(event.id)}
-            onToggleSave={() => toggleFavorite(toFavoriteEvent(event))}
-            onToggleCompare={() => toggleCompare(toFavoriteEvent(event))}
-            detailHref={`/events/${event.id}` as Route}
-          />
-        ))}
-      </div>
-    );
-  }, [
-    events,
-    isFavorite,
-    isLoading,
-    isSelected,
-    onResetFilters,
-    onViewOnMap,
-    onSyncData,
-    isSyncing,
-    totalCount,
-    selectedEventId,
-    toggleCompare,
-    toggleFavorite,
-  ]);
+    listElement.scrollBy({ top: event.deltaY, behavior: "auto" });
+    event.preventDefault();
+  };
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden bg-card/96" data-open={mobileOpen}>
-      <div className="flex items-center justify-between gap-3 px-4 py-3">
-        <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-foreground/90">
-          <span>{events.length} shown</span>
-          <span className="text-muted-foreground">/ {totalCount} loaded</span>
-          {activeFilterCount > 0 ? (
-            <Badge className="px-2 py-1 text-[0.56rem]">
-              {activeFilterCount} active
-            </Badge>
-          ) : null}
+    <aside
+      aria-label="Event results"
+      tabIndex={0}
+      onWheel={handlePanelWheel}
+      className="flex h-full min-h-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain bg-[var(--panel)] outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+    >
+      <EventCategoryPicker
+        value={filters.category}
+        onChange={(category) => onChangeFilters({ category, search: "" })}
+      />
+
+      <div className="shrink-0 space-y-3 border-b border-border px-3 py-3">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <EventSearchField
+            key={filters.search}
+            initialValue={filters.search}
+            onCommit={(search) => onChangeFilters({ search })}
+            className="pl-9"
+            disabled={!categorySelected}
+            placeholder={
+              categorySelected ? "Search events" : "Choose a category first"
+            }
+          />
         </div>
+
         <div className="flex items-center gap-2">
-          <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-            <SheetTrigger asChild>
+          <div className="mr-auto min-w-0 tabular-nums text-sm text-foreground">
+            {categorySelected ? (
+              <>
+                <span className="font-semibold">
+                  {events.length.toLocaleString()}
+                </span>
+                <span className="text-muted-foreground">
+                  {isMapAreaFiltered
+                    ? ` in area · ${totalCount.toLocaleString()} total`
+                    : ` of ${totalCount.toLocaleString()} events`}
+                </span>
+              </>
+            ) : (
+              <span className="text-xs font-medium text-muted-foreground">
+                Choose a category
+              </span>
+            )}
+          </div>
+
+          <Select
+            value={filters.sort}
+            disabled={!categorySelected}
+            onValueChange={(value) =>
+              onChangeFilters({ sort: value as EventListQueryParams["sort"] })
+            }
+          >
+            <SelectTrigger
+              aria-label="Sort events"
+              className="h-9 w-[9.75rem] text-xs"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {eventSortOptions
+                .filter((option) => option !== "severity")
+                .map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {getEventSortLabel(option)}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+
+          <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <PopoverTrigger asChild>
               <Button
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="rounded-full px-3 text-[0.68rem] uppercase tracking-[0.12em]"
+                className="relative"
               >
-                <SlidersHorizontal className="h-3.5 w-3.5" />
-                Filters
-                {activeFilterCount > 0 ? (
-                  <Badge className="h-5 min-w-5 rounded-full px-1.5 py-0 text-[0.56rem]">
-                    {activeFilterCount}
-                  </Badge>
+                <SlidersHorizontal className="size-4" />
+                <span className="hidden sm:inline">Filters</span>
+                {statusFilterActive ? (
+                  <span className="flex size-5 items-center justify-center rounded-full bg-[var(--brand)] text-[0.68rem] text-primary-foreground">
+                    1
+                  </span>
                 ) : null}
               </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full max-w-[30rem] bg-card/98 p-0">
-              <SheetHeader className="border-b border-border px-6 py-5 pr-14">
-                <SheetTitle>Filter events</SheetTitle>
-                <SheetDescription>
-                  Narrow the visible event list by search term, sort order, status, and category.
-                </SheetDescription>
-              </SheetHeader>
-
-              <div className="flex min-h-0 flex-1 flex-col">
-                <ScrollArea className="min-h-0 flex-1">
-                  <div className="px-6 py-5">
-                    <EventFilters
-                      filters={filters}
-                      onChange={onChangeFilters}
-                    />
-                  </div>
-                </ScrollArea>
-
-                <Separator />
-
-                <div className="flex items-center justify-between gap-3 px-6 py-4">
-                  <div className="text-sm text-muted-foreground">
-                    {activeFilterCount > 0
-                      ? `${activeFilterCount} filters active`
-                      : "No filters applied"}
-                  </div>
+            </PopoverTrigger>
+            <PopoverContent
+              align="end"
+              className="w-[min(24rem,calc(100vw-1.5rem))] p-4"
+            >
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="font-semibold text-foreground">
+                    Filter events
+                  </h2>
+                  <p className="mt-1 text-sm leading-5 text-muted-foreground">
+                    Show open, closed, or all source records.
+                  </p>
+                </div>
+                {statusFilterActive ? (
                   <Button
                     type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      onResetFilters();
-                      setFiltersOpen(false);
-                    }}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      onChangeFilters({ status: EventStatusFilter.All })
+                    }
                   >
-                    Reset filters
+                    Reset
                   </Button>
-                </div>
+                ) : null}
               </div>
-            </SheetContent>
-          </Sheet>
+              <EventFilters
+                filters={filters}
+                onChange={onChangeFilters}
+                showQueryControls={false}
+                showCategory={false}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => setMobileOpen((current) => !current)}
-            className="rounded-full text-muted-foreground md:hidden"
-            aria-label={mobileOpen ? "Collapse event list" : "Expand event list"}
+      <div className="min-h-64 flex-1 shrink-0">
+        {!categorySelected ? (
+          <CategorySelectionPrompt />
+        ) : isLoading && events.length === 0 ? (
+          <ResultsSkeleton />
+        ) : events.length === 0 ? (
+          <EmptyState
+            title="No events in this area"
+            description={
+              mirrorCount === 0
+                ? "The local event mirror is empty. Sync it once to load the map and timeline."
+                : hasEventsOutsideSearchedArea
+                  ? "No events are in the searched map area. Move the map, then choose Search in this area."
+                  : "No mirrored events match this category, status, and date range. Try a wider date range or reset the filters."
+            }
+            action={
+              mirrorCount === 0 ? (
+                onSyncData ? (
+                  <Button
+                    type="button"
+                    disabled={isSyncing}
+                    onClick={() => void onSyncData()}
+                  >
+                    {isSyncing ? "Syncing events" : "Sync event data"}
+                  </Button>
+                ) : undefined
+              ) : hasEventsOutsideSearchedArea ? undefined : (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={onResetFilters}
+                >
+                  Reset filters
+                </Button>
+              )
+            }
+          />
+        ) : (
+          <List
+            aria-label="Scrollable event list"
+            tabIndex={0}
+            listRef={listRef}
+            rowComponent={EventResultRow}
+            rowCount={events.length}
+            rowHeight={92}
+            rowProps={rowProps}
+            overscanCount={4}
+            defaultHeight={560}
+            className="event-results-scroll h-full outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+          />
+        )}
+      </div>
+    </aside>
+  );
+}
+
+type ResultRowProps = {
+  events: Event[];
+  selectedEventId: string | null;
+  onSelectEvent: (id: string) => void;
+};
+
+function EventResultRow({
+  index,
+  style,
+  ariaAttributes,
+  events,
+  selectedEventId,
+  onSelectEvent,
+}: RowComponentProps<ResultRowProps>) {
+  const event = events[index];
+  const selected = event.id === selectedEventId;
+  const categoryColor = getEventCategoryColor(event.categoryId);
+
+  return (
+    <div style={style} {...ariaAttributes} className="px-2 pt-2">
+      <div
+        className={cn(
+          "group flex h-[84px] w-full items-center gap-3 rounded-lg border px-3 text-left transition-colors",
+          selected
+            ? "border-[var(--brand)] bg-[var(--brand-soft)]"
+            : "border-transparent bg-transparent hover:border-border hover:bg-[var(--surface-strong)]",
+        )}
+      >
+        <button
+          type="button"
+          aria-label={`Select ${event.title}`}
+          aria-pressed={selected}
+          onClick={() => onSelectEvent(event.id)}
+          className="flex min-w-0 flex-1 items-center gap-3 self-stretch text-left focus-visible:outline-none"
+        >
+          <span
+            className="flex size-9 shrink-0 items-center justify-center rounded-md"
+            style={{
+              color: categoryColor,
+              backgroundColor: `${categoryColor}12`,
+            }}
           >
-            <ListFilter className="h-4 w-4" />
-            <ChevronUp
-              className="absolute h-4 w-4 transition-transform"
-              style={{ transform: mobileOpen ? "rotate(0deg)" : "rotate(180deg)" }}
+            <EventCategoryIcon
+              categoryId={event.categoryId}
+              className="size-[1.1rem]"
             />
-          </Button>
-        </div>
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="line-clamp-2 text-sm font-semibold leading-5 text-foreground">
+              {event.title}
+            </span>
+            <span className="mt-1 flex min-w-0 items-center gap-2 text-xs text-muted-foreground">
+              <time
+                dateTime={event.latestDate}
+                className="shrink-0 whitespace-nowrap tabular-nums"
+              >
+                {formatEventDateOnly(event.latestDate)}
+              </time>
+              <span aria-hidden="true" className="shrink-0">
+                ·
+              </span>
+              <span
+                className="min-w-0 flex-1 truncate"
+                title={getEventSourceDisplayName(event.sourceLabel)}
+              >
+                {getEventSourceDisplayName(event.sourceLabel)}
+              </span>
+            </span>
+          </span>
+        </button>
+        <Link
+          href={`/events/${encodeURIComponent(event.id)}`}
+          aria-label={`View details for ${event.title}`}
+          title="View event details"
+          className="flex size-10 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <ChevronRight
+            className={cn(
+              "size-4 transition-transform",
+              selected && "translate-x-0.5 text-[var(--brand)]",
+            )}
+          />
+        </Link>
       </div>
+    </div>
+  );
+}
 
-      <Separator />
+function ResultsSkeleton() {
+  return (
+    <div className="space-y-2 p-2" aria-label="Loading events">
+      {Array.from({ length: 7 }).map((_, index) => (
+        <div
+          key={index}
+          className="h-[84px] animate-pulse rounded-lg bg-[var(--surface-strong)]"
+        />
+      ))}
+    </div>
+  );
+}
 
-      <div className={cn(panelOpen ? "flex min-h-0 flex-1 flex-col" : "hidden md:flex md:min-h-0 md:flex-1 md:flex-col")}>
-        <ScrollArea className="min-h-0 flex-1 px-3 py-3">
-          {body}
-        </ScrollArea>
-
-        <Separator />
-
-        <div className="px-4 py-3">
-          <Button
-            asChild
-            variant="ghost"
-            className="w-full justify-start px-0 text-[0.72rem] uppercase tracking-[0.14em]"
-          >
-            <Link href="/favorites">Review saved events</Link>
-          </Button>
+function CategorySelectionPrompt() {
+  return (
+    <div className="flex h-full min-h-40 items-center justify-center px-6 py-10 text-center">
+      <div className="max-w-64">
+        <div aria-hidden="true" className="text-2xl">
+          🗺️
         </div>
+        <h2 className="mt-3 text-sm font-semibold text-foreground">
+          Choose what to explore
+        </h2>
+        <p className="mt-1.5 text-xs leading-5 text-muted-foreground">
+          Select a category above to load its events. The map remains available
+          for a global overview.
+        </p>
       </div>
-    </Card>
+    </div>
   );
 }

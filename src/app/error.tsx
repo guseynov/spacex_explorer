@@ -1,7 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { RetryState } from "@/components/retry-state";
 
 export default function Error({
   error,
@@ -10,24 +9,5 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return (
-    <Card className="bg-card/96 text-center">
-      <CardContent className="px-6 py-12 sm:px-10">
-        <div className="mx-auto max-w-xl space-y-4">
-          <p className="text-sm font-medium text-destructive">
-            Route failed to load
-          </p>
-          <h2 className="text-2xl font-semibold tracking-[-0.02em] text-foreground">
-            EONET Explorer hit a loading error.
-          </h2>
-          <p className="text-base leading-7 text-muted-foreground">
-            {error.message || "Try reloading the current route."}
-          </p>
-          <Button type="button" onClick={() => reset()}>
-            Try again
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  return <div className="mx-auto max-w-3xl px-4 py-12"><RetryState message={error.message || "Try loading this route again."} onRetry={reset} /></div>;
 }

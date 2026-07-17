@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   eventCategoryOptions,
+  EventSortOption,
   eventSortOptions,
   EventStatusFilter,
   getEventCategoryLabel,
@@ -22,17 +23,24 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 type EventFiltersProps = {
   filters: EventListQueryParams;
   onChange: (updates: Partial<EventListQueryParams>) => void;
+  showQueryControls?: boolean;
+  showCategory?: boolean;
 };
 
-export function EventFilters({ filters, onChange }: EventFiltersProps) {
+export function EventFilters({
+  filters,
+  onChange,
+  showQueryControls = true,
+  showCategory = true,
+}: EventFiltersProps) {
   return (
     <div className="space-y-4">
-      <div className="grid gap-3">
+      {showQueryControls ? <div className="grid gap-3">
         <label className="grid gap-1.5">
-          <span className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground">
             Search
           </span>
-          <EventSearchInput
+          <EventSearchField
             key={filters.search}
             initialValue={filters.search}
             onCommit={(search) => onChange({ search })}
@@ -40,7 +48,7 @@ export function EventFilters({ filters, onChange }: EventFiltersProps) {
         </label>
 
         <label className="grid gap-1.5">
-          <span className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground">
             Sort
           </span>
           <Select
@@ -53,7 +61,7 @@ export function EventFilters({ filters, onChange }: EventFiltersProps) {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {eventSortOptions.map((option) => (
+              {eventSortOptions.filter((option) => option !== EventSortOption.Severity).map((option) => (
                 <SelectItem key={option} value={option}>
                   {getEventSortLabel(option)}
                 </SelectItem>
@@ -61,10 +69,10 @@ export function EventFilters({ filters, onChange }: EventFiltersProps) {
             </SelectContent>
           </Select>
         </label>
-      </div>
+      </div> : null}
 
       <div className="space-y-2">
-        <div className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+        <div className="text-xs font-medium text-muted-foreground">
           Status
         </div>
         <ToggleGroup
@@ -88,15 +96,15 @@ export function EventFilters({ filters, onChange }: EventFiltersProps) {
               {status === EventStatusFilter.All
                 ? "All"
                 : status === EventStatusFilter.Active
-                  ? "Active"
+                  ? "Open"
                   : "Closed"}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
       </div>
 
-      <div className="space-y-2">
-        <div className="text-[0.66rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+      {showCategory ? <div className="space-y-2">
+        <div className="text-xs font-medium text-muted-foreground">
           Category
         </div>
         <ToggleGroup
@@ -120,7 +128,7 @@ export function EventFilters({ filters, onChange }: EventFiltersProps) {
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-      </div>
+      </div> : null}
     </div>
   );
 }
@@ -128,9 +136,18 @@ export function EventFilters({ filters, onChange }: EventFiltersProps) {
 type EventSearchInputProps = {
   initialValue: string;
   onCommit: (search: string) => void;
+  className?: string;
+  disabled?: boolean;
+  placeholder?: string;
 };
 
-function EventSearchInput({ initialValue, onCommit }: EventSearchInputProps) {
+export function EventSearchField({
+  initialValue,
+  onCommit,
+  className,
+  disabled = false,
+  placeholder = "Search events",
+}: EventSearchInputProps) {
   const [draftSearch, setDraftSearch] = useState(initialValue);
 
   useEffect(() => {
@@ -148,9 +165,11 @@ function EventSearchInput({ initialValue, onCommit }: EventSearchInputProps) {
   return (
     <Input
       aria-label="Event search"
+      disabled={disabled}
       value={draftSearch}
       onChange={(event) => setDraftSearch(event.target.value)}
-      placeholder="Search events"
+      placeholder={placeholder}
+      className={className}
     />
   );
 }

@@ -2,8 +2,10 @@ import {
   buildEonetQueryParams,
   createBaseEventFilters,
   createDefaultEventFilters,
+  getTimelineDomain,
   normalizeEventDateRange,
   normalizeEventFilters,
+  parseEventSearchParams,
   toFavoriteEvent,
 } from "./event-query-builder";
 
@@ -16,6 +18,29 @@ describe("event query builder", () => {
     ).toEqual({
       from: "2026-06-01",
       to: "2026-07-05",
+    });
+  });
+
+  it("uses the fixed 2018 history boundary for URLs and date ranges", () => {
+    expect(getTimelineDomain(now)).toEqual({
+      min: "2018-01-01",
+      max: "2026-07-06",
+    });
+    expect(
+      parseEventSearchParams(
+        new URLSearchParams("from=2018-01-01&to=2026-07-06"),
+        now,
+      ),
+    ).toEqual({
+      ...createDefaultEventFilters(now),
+      from: "2018-01-01",
+      to: "2026-07-06",
+    });
+    expect(
+      normalizeEventDateRange("2017-01-01", "2019-01-01", now),
+    ).toEqual({
+      from: "2018-01-01",
+      to: "2019-01-01",
     });
   });
 
@@ -38,7 +63,7 @@ describe("event query builder", () => {
     ).toEqual({
       status: "closed",
       category: "wildfires",
-      from: "2021-07-06",
+      from: "2018-01-01",
       to: "2026-07-06",
       sort: "newest",
       search: "",

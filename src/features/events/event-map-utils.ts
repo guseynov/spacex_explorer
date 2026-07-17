@@ -14,16 +14,6 @@ export const EVENT_CATEGORY_COLORS: Record<string, string> = {
   uncategorized: "#7f96b7",
 };
 
-export const CATEGORY_LEGEND_ITEMS = [
-  { id: "wildfires", label: "Wildfires" },
-  { id: "severeStorms", label: "Storms" },
-  { id: "floods", label: "Floods" },
-  { id: "volcanoes", label: "Volcanoes" },
-  { id: "seaLakeIce", label: "Sea & lake ice" },
-  { id: "drought", label: "Drought" },
-  { id: "dustHaze", label: "Dust & haze" },
-] as const;
-
 type EventFeature = {
   type: "Feature";
   geometry: {

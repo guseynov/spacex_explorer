@@ -1,5 +1,8 @@
 import { EventApiError } from "@/lib/api/errors";
-import { parseEventSearchParams } from "@/lib/api/event-query-builder";
+import {
+  EVENT_PAGE_SIZE,
+  parseEventSearchParams,
+} from "@/lib/api/event-query-builder";
 import {
   getEventStoreSyncStatus,
   queryEventStorePage,
@@ -9,7 +12,10 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const page = Math.max(Number(url.searchParams.get("page")) || 1, 1);
-    const limit = Math.max(Number(url.searchParams.get("limit")) || 500, 1);
+    const limit = Math.max(
+      Number(url.searchParams.get("limit")) || EVENT_PAGE_SIZE,
+      1,
+    );
     const filters = parseEventSearchParams(url.searchParams);
     const events = await queryEventStorePage(filters, page, limit);
     const sync = await getEventStoreSyncStatus();

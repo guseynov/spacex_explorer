@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function Error({
   error,
-  reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
@@ -23,7 +22,7 @@ export default function Error({
           <p className="text-base leading-7 text-muted-foreground">
             {error.message || "Try loading the favorites page again."}
           </p>
-          <Button type="button" onClick={() => reset()}>
+          <Button type="button" onClick={() => window.location.reload()}>
             Try again
           </Button>
         </div>

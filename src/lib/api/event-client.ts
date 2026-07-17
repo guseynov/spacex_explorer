@@ -1,5 +1,8 @@
-import type { EventListQueryParams } from "./event-query-builder";
-import { stringifyEventSearchParams } from "./event-query-builder";
+import {
+  EVENT_PAGE_SIZE,
+  stringifyEventSearchParams,
+  type EventListQueryParams,
+} from "./event-query-builder";
 import { EventApiError } from "./errors";
 import {
   eventListPageSchema,
@@ -30,6 +33,7 @@ async function requestBrowserJson<T>(path: string, parser: Parser<T>) {
 export function fetchEventsPage(filters: EventListQueryParams, page: number) {
   const params = stringifyEventSearchParams(filters);
   params.set("page", String(page));
+  params.set("limit", String(EVENT_PAGE_SIZE));
 
   return requestBrowserJson(`?${params.toString()}`, eventListPageSchema);
 }

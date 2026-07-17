@@ -1,5 +1,8 @@
 import "@testing-library/jest-dom/vitest";
-import { vi } from "vitest";
+import { cleanup } from "@testing-library/react";
+import { afterEach, vi } from "vitest";
+
+afterEach(cleanup);
 
 if (typeof window !== "undefined") {
   Object.defineProperty(window, "matchMedia", {
@@ -24,3 +27,13 @@ class ResizeObserverMock {
 }
 
 vi.stubGlobal("ResizeObserver", ResizeObserverMock);
+
+if (!HTMLElement.prototype.scrollBy) {
+  Object.defineProperty(HTMLElement.prototype, "scrollBy", {
+    configurable: true,
+    value(options: ScrollToOptions | number, y?: number) {
+      const top = typeof options === "number" ? (y ?? 0) : (options.top ?? 0);
+      this.scrollTop += top;
+    },
+  });
+}

@@ -1,6 +1,8 @@
-# Earth Event Explorer
+# Earth Event Atlas
 
-Earth Event Explorer is a Next.js, React, and TypeScript app for exploring NASA EONET natural events through a DB-backed mirror. The app centers the globe, timeline, and event list instead of a generic card grid, while keeping typed API normalization, favorites, and compare state.
+Earth Event Atlas is an independent, map-first public explorer for NASA EONET natural-event records. It combines a searchable globe, time-range navigation, source-oriented event details, local Saved events, and a two-record comparison workspace over a typed database-backed mirror.
+
+NASA EONET and the upstream sources listed on each record provide the data. Earth Event Atlas is not affiliated with or endorsed by NASA.
 
 ## Run Locally On WSL2
 
@@ -73,12 +75,12 @@ curl -X POST "https://<your-project>.vercel.app/api/cron/eonet-sync?secret=<EONE
 API keys:
 
 - NASA EONET does not require an API key: [https://eonet.gsfc.nasa.gov/docs/v3](https://eonet.gsfc.nasa.gov/docs/v3)
-- A map key is optional. Without `NEXT_PUBLIC_MAP_STYLE_URL`, local/dev uses the public MapLibre demo style. For production, use a MapLibre-compatible provider such as MapTiler: [https://docs.maptiler.com/cloud/api/authentication-key/](https://docs.maptiler.com/cloud/api/authentication-key/)
+- A map key is optional. Without `NEXT_PUBLIC_MAP_STYLE_URL`, the app uses Esri World Imagery in Hybrid mode with an optional dark Atlas view. For production, you can instead provide a MapLibre-compatible style URL.
 - Vercel Marketplace Postgres providers or Neon provide `DATABASE_URL` through their dashboard; no NASA key is needed.
 
 ## Stack
 
-- `Next.js App Router` for the explorer, event detail, favorites, compare, and API routes.
+- `Next.js App Router` for the explorer, event detail, Saved, Compare, and API routes.
 - `TanStack Query` for client-side caching and refetch behavior.
 - `Tailwind CSS` plus a small token layer in [src/app/globals.css](./src/app/globals.css).
 - `Zod` for validated event schemas at the EONET boundary.
@@ -118,10 +120,12 @@ MapLibre style is configurable through:
 NEXT_PUBLIC_MAP_STYLE_URL=https://your-style-host/style.json
 ```
 
-If that variable is not set, the app falls back to the public MapLibre demo style for local development.
+If that variable is not set, the app starts in a bundled hybrid mode using Esri World Imagery beneath the existing country boundaries, labels, and event layers. The in-map control can switch back to the night-cartography Atlas mode. Imagery attribution is displayed by the in-map attribution control.
+
+Hybrid imagery is provided by NASA Global Imagery Browse Services (GIBS), part of NASA EOSDIS.
 
 ## Notes
 
-- Favorites and compare selections persist in `localStorage` under the current EONET event shape.
+- Saved and compare selections persist in `localStorage` under the current EONET event shape.
 - `npm run eonet:sync` refreshes the recent mirror window; `npm run eonet:backfill` fills historical data in throttled windows.
-- Playwright coverage targets the map-first explorer, detail route, favorites, and compare flow.
+- Playwright coverage targets the map-first explorer, detail route, Saved, and Compare flows.

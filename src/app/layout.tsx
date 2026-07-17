@@ -1,37 +1,24 @@
 import type { Metadata } from "next";
-import {
-  Barlow_Condensed,
-  Inter,
-  JetBrains_Mono,
-} from "next/font/google";
+import { Inter } from "next/font/google";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
 import { AppProviders } from "./providers";
+import { SiteHeader } from "@/components/site-header";
 
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-body",
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-});
-
-const barlowCondensed = Barlow_Condensed({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-display",
+  variable: "--font-atlas",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://eonet-explorer.local"),
+  metadataBase: new URL("https://earth-event-atlas.local"),
   title: {
-    default: "Earth Event Explorer",
-    template: "%s | Earth Event Explorer",
+    default: "Earth Event Atlas",
+    template: "%s | Earth Event Atlas",
   },
   description:
-    "Explore NASA EONET natural events through a DB-backed, map-first Earth observation dashboard.",
+    "Explore natural events across the planet and through time with data from NASA EONET.",
 };
 
 export default function RootLayout({
@@ -43,11 +30,12 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${inter.variable} ${jetBrainsMono.variable} ${barlowCondensed.variable}`}
+      className={inter.variable}
     >
-      <body className="relative min-h-dvh overflow-x-hidden text-foreground">
+      <body className="min-h-dvh overflow-x-hidden bg-background text-foreground">
         <AppProviders>
-          <main className="relative z-10 min-h-dvh overflow-hidden">
+          <SiteHeader />
+          <main className="min-h-[calc(100dvh-3.5rem)]">
             {children}
           </main>
         </AppProviders>

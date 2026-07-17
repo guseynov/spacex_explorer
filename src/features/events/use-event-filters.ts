@@ -2,6 +2,7 @@
 
 import type { Route } from "next";
 import { usePathname, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
 import {
   createDefaultEventFilters,
   normalizeEventFilters,
@@ -13,8 +14,12 @@ import {
 export function useEventFilters() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const filters = parseEventSearchParams(new URLSearchParams(searchParams));
-  const currentRoute = buildRouteWithQuery(pathname, searchParams.toString());
+  const serializedSearchParams = searchParams.toString();
+  const filters = useMemo(
+    () => parseEventSearchParams(new URLSearchParams(serializedSearchParams)),
+    [serializedSearchParams],
+  );
+  const currentRoute = buildRouteWithQuery(pathname, serializedSearchParams);
 
   const setFilters = (
     updates:
